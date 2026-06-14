@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { videoRecorder } from '../../utils/VideoRecorder';
-import { Play, Pause, Upload, Settings, Video, Aperture, Circle, Dna, LifeBuoy, Droplets } from 'lucide-react';
+import { Play, Pause, Upload, Settings, Video, Aperture, Circle, Dna, LifeBuoy, Droplets, X } from 'lucide-react';
 import type { ShapeType } from '../../App';
 
 interface OverlayHUDProps {
@@ -29,6 +29,16 @@ interface OverlayHUDProps {
   setParticleSize: (val: number) => void;
   liquidFusion: boolean;
   setLiquidFusion: (val: boolean) => void;
+  imageFile: File | null;
+  setImageFile: (val: File | null) => void;
+  voxelResolution: number;
+  setVoxelResolution: (val: number) => void;
+  voxelSpacing: number;
+  setVoxelSpacing: (val: number) => void;
+  windStrength: number;
+  setWindStrength: (val: number) => void;
+  gatherStrength: number;
+  setGatherStrength: (val: number) => void;
 }
 
 export function OverlayHUD({ 
@@ -43,7 +53,12 @@ export function OverlayHUD({
   saturation, setSaturation,
   flicker, setFlicker,
   particleSize, setParticleSize,
-  liquidFusion, setLiquidFusion
+  liquidFusion, setLiquidFusion,
+  imageFile, setImageFile,
+  voxelResolution, setVoxelResolution,
+  voxelSpacing, setVoxelSpacing,
+  windStrength, setWindStrength,
+  gatherStrength, setGatherStrength
 }: OverlayHUDProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -62,22 +77,32 @@ export function OverlayHUD({
     return () => audioAnalyzer.audio.removeEventListener('ended', handleEnded);
   }, [isRecording]);
 
+  const handleImageFile = useCallback((file: File) => {
+    setImageFile(file);
+  }, [setImageFile]);
+
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('audio/')) {
+    if (!file) return;
+    if (file.type.startsWith('audio/')) {
       setFileName(file.name);
       await audioAnalyzer.loadAudio(file);
       setIsPlaying(false);
+    } else if (file.type.startsWith('image/')) {
+      await handleImageFile(file);
     }
-  }, []);
+  }, [handleImageFile]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('audio/')) {
+    if (!file) return;
+    if (file.type.startsWith('audio/')) {
       setFileName(file.name);
       await audioAnalyzer.loadAudio(file);
       setIsPlaying(false);
+    } else if (file.type.startsWith('image/')) {
+      await handleImageFile(file);
     }
   };
 
@@ -114,16 +139,16 @@ export function OverlayHUD({
             onClick={() => fileInputRef.current?.click()}
             style={{ cursor: 'pointer' }}
           >
-            <input 
-              type="file" 
-              accept="audio/*" 
-              ref={fileInputRef} 
-              onChange={handleFileSelect} 
-              style={{ display: 'none' }} 
+            <input
+              type="file"
+              accept="audio/*,image/*"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
             />
             <Upload size={32} />
             <p>DRAG & DROP OR CLICK TO BROWSE</p>
-            <span className="sub-text">MP3, WAV, FLAC</span>
+            <span className="sub-text">MP3, WAV, FLAC / IMAGE</span>
           </div>
         ) : (
           <div className="player-panel">
@@ -147,6 +172,63 @@ export function OverlayHUD({
             <Settings size={16} />
             <span>PARAMETERS</span>
           </div>
+
+          {imageFile && (
+            <div className="slider-group" style={{ padding: '0.8rem 0', borderBottom: '1px solid var(--border)', marginBottom: '1rem' }}>
+              <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: 0 }}>
+                <span>IMAGE VOXEL MODE</span>
+                <button
+                  className="shape-btn"
+                  title="CLEAR IMAGE (RETURN TO SWARM)"
+                  onClick={() => setImageFile(null)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px' }}
+                >
+                  <X size={14} /> CLEAR
+                </button>
+              </label>
+
+              <div className="slider-group">
+                <label>VOXEL RESOLUTION</label>
+                <input
+                  type="range"
+                  min="8" max="160" step="1"
+                  value={voxelResolution}
+                  onChange={(e) => setVoxelResolution(parseInt(e.target.value, 10))}
+                />
+                <span className="slider-value">{voxelResolution}px</span>
+              </div>
+              <div className="slider-group">
+                <label>VOXEL SPACING</label>
+                <input
+                  type="range"
+                  min="0.5" max="4" step="0.1"
+                  value={voxelSpacing}
+                  onChange={(e) => setVoxelSpacing(parseFloat(e.target.value))}
+                />
+                <span className="slider-value">{voxelSpacing.toFixed(1)}</span>
+              </div>
+              <div className="slider-group">
+                <label>WIND STRENGTH</label>
+                <input
+                  type="range"
+                  min="0" max="2" step="0.01"
+                  value={windStrength}
+                  onChange={(e) => setWindStrength(parseFloat(e.target.value))}
+                />
+                <span className="slider-value">{(windStrength * 100).toFixed(0)}%</span>
+              </div>
+              <div className="slider-group">
+                <label>GATHER (SWARM ⇄ IMAGE)</label>
+                <input
+                  type="range"
+                  min="0" max="1" step="0.01"
+                  value={gatherStrength}
+                  onChange={(e) => setGatherStrength(parseFloat(e.target.value))}
+                />
+                <span className="slider-value">{(gatherStrength * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+          )}
 
           <div className="shape-selector">
             <label>FORMATION</label>

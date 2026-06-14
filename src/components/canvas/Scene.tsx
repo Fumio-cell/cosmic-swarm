@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { ParticleSwarm } from './ParticleSwarm';
+import { ImageVoxelSwarm } from './ImageVoxelSwarm';
 import { GooEffect } from './GooEffect';
 import type { ShapeType } from '../../App';
 
@@ -18,24 +19,40 @@ interface SceneProps {
   flicker: number;
   particleSize: number;
   liquidFusion: boolean;
+  imageFile: File | null;
+  voxelResolution: number;
+  voxelSpacing: number;
+  windStrength: number;
+  gatherStrength: number;
 }
 
-export function Scene({ reactiveness, zoom, hueShift, rotationSpeed, chaos, shape, brightness, density, saturation, flicker, particleSize, liquidFusion }: SceneProps) {
+export function Scene({ reactiveness, zoom, hueShift, rotationSpeed, chaos, shape, brightness, density, saturation, flicker, particleSize, liquidFusion, imageFile, voxelResolution, voxelSpacing, windStrength, gatherStrength }: SceneProps) {
   return (
     <div className="canvas-container">
       <Canvas camera={{ position: [0, 0, 20], fov: 45 }}>
         <color attach="background" args={['#050505']} />
         <ambientLight intensity={0.5} />
         
-        {/* Using key={shape} forces the particle component to completely remount when shape changes, ensuring clean geometry updates */}
-        <ParticleSwarm 
-          key={shape} 
-          reactiveness={reactiveness} zoom={zoom} 
-          hueShift={hueShift} chaos={chaos} shape={shape} 
-          brightness={brightness} density={density} saturation={saturation}
-          flicker={flicker} particleSize={particleSize}
-        />
-        
+        {imageFile ? (
+          <ImageVoxelSwarm
+            key={imageFile.name + imageFile.lastModified}
+            imageFile={imageFile}
+            voxelResolution={voxelResolution}
+            voxelSpacing={voxelSpacing}
+            windStrength={windStrength}
+            gatherStrength={gatherStrength}
+          />
+        ) : (
+          // Using key={shape} forces the particle component to completely remount when shape changes, ensuring clean geometry updates
+          <ParticleSwarm
+            key={shape}
+            reactiveness={reactiveness} zoom={zoom}
+            hueShift={hueShift} chaos={chaos} shape={shape}
+            brightness={brightness} density={density} saturation={saturation}
+            flicker={flicker} particleSize={particleSize}
+          />
+        )}
+
         <OrbitControls 
           enableDamping 
           dampingFactor={0.05} 

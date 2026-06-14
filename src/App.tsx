@@ -18,6 +18,11 @@ function App() {
   const [flicker, setFlicker] = useState(1.0);
   const [particleSize, setParticleSize] = useState(1.0);
   const [liquidFusion, setLiquidFusion] = useState(true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [voxelResolution, setVoxelResolution] = useState(64);
+  const [voxelSpacing, setVoxelSpacing] = useState(1.5);
+  const [windStrength, setWindStrength] = useState(0.4);
+  const [gatherStrength, setGatherStrength] = useState(1.0);
 
   return (
     <div className="toolkit-wrapper" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
@@ -28,8 +33,10 @@ function App() {
         rotationSpeed={rotationSpeed} chaos={chaos} shape={shape} 
         brightness={brightness} density={density} saturation={saturation}
         flicker={flicker} particleSize={particleSize} liquidFusion={liquidFusion}
+        imageFile={imageFile} voxelResolution={voxelResolution} voxelSpacing={voxelSpacing}
+        windStrength={windStrength} gatherStrength={gatherStrength}
       />
-      <OverlayHUD 
+      <OverlayHUD
         reactiveness={reactiveness} setReactiveness={setReactiveness}
         zoom={zoom} setZoom={setZoom}
         hueShift={hueShift} setHueShift={setHueShift}
@@ -42,6 +49,11 @@ function App() {
         flicker={flicker} setFlicker={setFlicker}
         particleSize={particleSize} setParticleSize={setParticleSize}
         liquidFusion={liquidFusion} setLiquidFusion={setLiquidFusion}
+        imageFile={imageFile} setImageFile={setImageFile}
+        voxelResolution={voxelResolution} setVoxelResolution={setVoxelResolution}
+        voxelSpacing={voxelSpacing} setVoxelSpacing={setVoxelSpacing}
+        windStrength={windStrength} setWindStrength={setWindStrength}
+        gatherStrength={gatherStrength} setGatherStrength={setGatherStrength}
       />
       </div>
     </div>
