@@ -112,7 +112,9 @@ export function ImageVoxelSwarm({
         color.setRGB(p.r / 255, p.g / 255, p.b / 255);
         colorAttr.setXYZ(i, color.r, color.g, color.b);
 
-        sizeAttr.setX(i, Math.random() * 0.4 + 0.4);
+        // Scale particle size with cell size so higher resolutions show crisper,
+        // less-overlapping detail instead of washing out into a blurred mass.
+        sizeAttr.setX(i, (Math.random() * 0.4 + 0.8) * cellSize);
         audioIndexAttr.setX(i, Math.random());
       }
 
