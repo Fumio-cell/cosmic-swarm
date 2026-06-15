@@ -133,29 +133,29 @@ export function OverlayHUD({
     <div className="overlay-hud" onDrop={handleDrop} onDragOver={handleDragOver}>
       {/* Main Dropzone / Controls */}
       <div className="hud-controls">
-        {!fileName ? (
-          <div 
-            className="dropzone" 
-            onClick={() => fileInputRef.current?.click()}
-            style={{ cursor: 'pointer' }}
-          >
-            <input
-              type="file"
-              accept="audio/*,image/*"
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-            <Upload size={32} />
-            <p>DRAG & DROP OR CLICK TO BROWSE</p>
-            <span className="sub-text">MP3, WAV, FLAC / IMAGE</span>
-          </div>
-        ) : (
+        <div
+          className="dropzone"
+          onClick={() => fileInputRef.current?.click()}
+          style={{ cursor: 'pointer' }}
+        >
+          <input
+            type="file"
+            accept="audio/*,image/*"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+          <Upload size={32} />
+          <p>DRAG & DROP OR CLICK TO BROWSE</p>
+          <span className="sub-text">MP3, WAV, FLAC / IMAGE</span>
+        </div>
+
+        {fileName && (
           <div className="player-panel">
             <div className="track-info">
               <span className="track-name">{fileName}</span>
             </div>
-            
+
             <button className={`render-btn ${isRecording ? 'recording' : ''}`} onClick={startRender} disabled={isRecording}>
               <Video size={20} />
               {isRecording ? 'RECORDING...' : 'RENDER VIDEO'}

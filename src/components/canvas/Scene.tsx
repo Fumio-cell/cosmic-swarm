@@ -41,6 +41,9 @@ export function Scene({ reactiveness, zoom, hueShift, rotationSpeed, chaos, shap
             voxelSpacing={voxelSpacing}
             windStrength={windStrength}
             gatherStrength={gatherStrength}
+            reactiveness={reactiveness} hueShift={hueShift} chaos={chaos}
+            brightness={brightness} density={density} saturation={saturation}
+            flicker={flicker} particleSize={particleSize} liquidFusion={liquidFusion}
           />
         ) : (
           // Using key={shape} forces the particle component to completely remount when shape changes, ensuring clean geometry updates
