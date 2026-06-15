@@ -78,6 +78,6 @@ void main() {
 
   float pSize = aSize * (50.0 / max(-mvPosition.z, 0.1)) * (1.0 + audioValue * 2.0 * uFlicker) * uParticleSize;
   float fusionScale = mix(1.0, 2.5, uLiquidFusion);
-  gl_PointSize = clamp(pSize * fusionScale, 1.5, 800.0);
+  gl_PointSize = clamp(pSize * fusionScale, 3.0, 800.0);
   gl_Position = projectionMatrix * mvPosition;
 }

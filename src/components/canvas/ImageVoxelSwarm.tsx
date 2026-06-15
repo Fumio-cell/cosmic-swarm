@@ -116,7 +116,7 @@ export function ImageVoxelSwarm({
 
         // Scale particle size with cell size so higher resolutions show crisper,
         // less-overlapping detail instead of washing out into a blurred mass.
-        sizeAttr.setX(i, (Math.random() * 0.4 + 0.8) * cellSize);
+        sizeAttr.setX(i, (Math.random() * 0.4 + 1.2) * cellSize * 2.0);
         audioIndexAttr.setX(i, Math.random());
       }
 
