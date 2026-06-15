@@ -10,6 +10,7 @@ const MAX_INSTANCES = 30000;
 
 interface ImageVoxelSwarmProps {
   imageFile: File;
+  zoom: number;
   voxelResolution: number;
   voxelSpacing: number;
   windStrength: number;
@@ -27,6 +28,7 @@ interface ImageVoxelSwarmProps {
 
 export function ImageVoxelSwarm({
   imageFile,
+  zoom,
   voxelResolution,
   voxelSpacing,
   windStrength,
@@ -152,6 +154,11 @@ export function ImageVoxelSwarm({
 
     if (audioAnalyzer.isPlaying()) {
       audioAnalyzer.updateTexture();
+    }
+
+    if (pointsRef.current) {
+      const targetScale = 0.15 + (zoom * 4.85);
+      pointsRef.current.scale.setScalar(THREE.MathUtils.lerp(pointsRef.current.scale.x, targetScale, 0.05));
     }
   });
 
