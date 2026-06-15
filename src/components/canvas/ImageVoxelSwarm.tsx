@@ -167,8 +167,8 @@ export function ImageVoxelSwarm({
     const holdTime = 1.5;
     const breakupDuration = 3.0;
     const breakupProgress = THREE.MathUtils.clamp((elapsed - holdTime) / breakupDuration, 0, 1);
-    // The photo always breaks apart at least partway, even if GATHER is at 100%.
-    const restGather = Math.min(THREE.MathUtils.clamp(gatherStrength, 0, 1), 0.4);
+    // GATHER fully controls the rest state: 100% reassembles the original photo.
+    const restGather = THREE.MathUtils.clamp(gatherStrength, 0, 1);
     const targetGather = THREE.MathUtils.lerp(1.0, restGather, breakupProgress);
     currentGather.current = THREE.MathUtils.lerp(currentGather.current, targetGather, 0.03);
     u.uGather.value = currentGather.current;
