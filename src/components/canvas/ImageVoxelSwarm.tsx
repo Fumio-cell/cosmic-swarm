@@ -46,6 +46,9 @@ export function ImageVoxelSwarm({
   const pointsRef = useRef<THREE.Points>(null);
   const shaderRef = useRef<THREE.ShaderMaterial>(null);
   const color = useMemo(() => new THREE.Color(), []);
+  // On import, show the photo fully formed first, then let it break apart
+  // toward the GATHER slider's target over a few seconds.
+  const currentGather = useRef(1.0);
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -127,6 +130,10 @@ export function ImageVoxelSwarm({
       audioIndexAttr.needsUpdate = true;
       geometry.setDrawRange(0, limited.length);
       geometry.computeBoundingSphere();
+
+      // Reset to a fully-formed photo on import; it will break apart
+      // toward the GATHER slider's target in the animation loop below.
+      currentGather.current = 1.0;
     });
 
     return () => {
@@ -149,7 +156,9 @@ export function ImageVoxelSwarm({
     u.uLiquidFusion.value = liquidFusion ? 1.0 : 0.0;
     u.uBass.value = audioAnalyzer.bass;
     u.uTreble.value = audioAnalyzer.treble;
-    u.uGather.value = THREE.MathUtils.clamp(gatherStrength, 0, 1);
+    const targetGather = THREE.MathUtils.clamp(gatherStrength, 0, 1);
+    currentGather.current = THREE.MathUtils.lerp(currentGather.current, targetGather, 0.02);
+    u.uGather.value = currentGather.current;
     u.uWind.value = windStrength;
 
     if (audioAnalyzer.isPlaying()) {
