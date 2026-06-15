@@ -62,6 +62,72 @@ function scatterPosition(shape: ShapeType, i: number, total: number): [number, n
   }
 }
 
+// Deterministic pseudo-random in [0,1), so the formation shapes below are
+// stable across re-renders instead of reshuffling every time.
+function hash(i: number, seed: number): number {
+  const s = Math.sin(i * 12.9898 + seed * 78.233) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+// Map each image pixel onto the selected FORMATION shape, so abstract images
+// can be reshaped into galaxy/helix/torus/amoeba layouts while keeping their
+// original per-pixel colors. `scale` matches the shape's extent to the
+// image's normal on-screen size.
+function shapeHomePosition(shape: ShapeType, i: number, total: number, scale: number): [number, number, number] {
+  switch (shape) {
+    case 'galaxy': {
+      const radius = hash(i, 1) * 15;
+      const spinAngle = radius * 1.5;
+      const branchAngle = (i % 5) * ((Math.PI * 2) / 5);
+      const x = Math.cos(spinAngle + branchAngle) * radius;
+      const z = Math.sin(spinAngle + branchAngle) * radius;
+      const y = (hash(i, 2) - 0.5) * 2.0 * (15.0 - radius) * 0.15;
+      return [x * scale, y * scale, z * scale];
+    }
+    case 'helix': {
+      const t = (i / total) * 100;
+      const branch = (i % 2) * Math.PI;
+      const r = 4;
+      const x = Math.cos(t + branch) * r + (hash(i, 3) - 0.5) * 1.0;
+      const z = Math.sin(t + branch) * r + (hash(i, 4) - 0.5) * 1.0;
+      const y = (t - 50) * 0.25 + (hash(i, 5) - 0.5) * 1.0;
+      return [x * scale, y * scale, z * scale];
+    }
+    case 'torus': {
+      const u = hash(i, 6) * Math.PI * 2;
+      const v = hash(i, 7) * Math.PI * 2;
+      const R = 6;
+      const r = 2 * hash(i, 8);
+      const x = (R + r * Math.cos(v)) * Math.cos(u);
+      const y = r * Math.sin(v) * 1.5;
+      const z = (R + r * Math.cos(v)) * Math.sin(u);
+      return [x * scale, y * scale, z * scale];
+    }
+    case 'amoeba': {
+      const clusterId = i % 30;
+      const cx = (Math.sin(clusterId * 12.9898) * 43758.5453 % 1 - 0.5) * 30;
+      const cy = (Math.sin(clusterId * 78.233) * 43758.5453 % 1 - 0.5) * 30;
+      const cz = (Math.sin(clusterId * 39.346) * 43758.5453 % 1 - 0.5) * 30;
+      const u = hash(i, 9);
+      const v = hash(i, 10);
+      const theta = 2 * Math.PI * u;
+      const phi = Math.acos(2 * v - 1);
+      const r = 4 * Math.pow(hash(i, 11), 0.3);
+      const x = cx + r * Math.sin(phi) * Math.cos(theta);
+      const y = cy + r * Math.sin(phi) * Math.sin(theta);
+      const z = cz + r * Math.cos(phi);
+      return [x * scale, y * scale, z * scale];
+    }
+    case 'sphere':
+    default: {
+      const r = 8 + hash(i, 12) * 6;
+      const theta = hash(i, 13) * Math.PI * 2;
+      const phi = Math.acos(2 * hash(i, 14) - 1);
+      return [r * Math.sin(phi) * Math.cos(theta) * scale, r * Math.sin(phi) * Math.sin(theta) * scale, r * Math.cos(phi) * scale];
+    }
+  }
+}
+
 interface ImageVoxelSwarmProps {
   imageFile: File;
   shape: ShapeType;
@@ -159,8 +225,15 @@ export function ImageVoxelSwarm({
       for (let i = 0; i < limited.length; i++) {
         const p = limited[i];
 
-        // Home position: image grid centered at origin, Y flipped (image Y grows downward)
-        homeAttr.setXYZ(i, (p.x - half) * cellSize, (half - p.y) * cellSize, 0);
+        // Home position: image grid centered at origin, Y flipped (image Y grows downward),
+        // or reshaped onto the selected FORMATION for non-sphere shapes.
+        if (shape === 'sphere') {
+          homeAttr.setXYZ(i, (p.x - half) * cellSize, (half - p.y) * cellSize, 0);
+        } else {
+          const shapeScale = (half * cellSize) / 8;
+          const [hx, hy, hz] = shapeHomePosition(shape, i, limited.length, shapeScale);
+          homeAttr.setXYZ(i, hx, hy, hz);
+        }
 
         // Scatter position: follow the selected FORMATION shape
         const [sx, sy, sz] = scatterPosition(shape, i, limited.length);
@@ -216,7 +289,7 @@ export function ImageVoxelSwarm({
     }
 
     if (pointsRef.current) {
-      const targetScale = 0.15 + (zoom * 4.85);
+      const targetScale = 0.15 + (zoom * zoom * 14.85);
       pointsRef.current.scale.setScalar(THREE.MathUtils.lerp(pointsRef.current.scale.x, targetScale, 0.05));
     }
   });
