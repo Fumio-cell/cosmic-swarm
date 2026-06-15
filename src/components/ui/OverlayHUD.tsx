@@ -167,7 +167,10 @@ export function OverlayHUD({
           </div>
         )}
 
-        <div className="parameter-panel">
+      </div>
+
+      {/* Parameter Panel — right side */}
+      <div className="parameter-panel">
           <div className="param-header">
             <Settings size={16} />
             <span>PARAMETERS</span>
@@ -374,7 +377,6 @@ export function OverlayHUD({
             <span className="slider-value">{(density * 100).toFixed(0)}%</span>
           </div>
         </div>
-      </div>
 
       {/* Interaction Hint */}
       <div className="interaction-hint" style={{
