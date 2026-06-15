@@ -37,6 +37,7 @@ export function Scene({ reactiveness, zoom, hueShift, rotationSpeed, chaos, shap
           <ImageVoxelSwarm
             key={imageFile.name + imageFile.lastModified}
             imageFile={imageFile}
+            shape={shape}
             zoom={zoom}
             voxelResolution={voxelResolution}
             voxelSpacing={voxelSpacing}

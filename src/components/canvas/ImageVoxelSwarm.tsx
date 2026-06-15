@@ -3,13 +3,68 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { analyzeImagePixels } from '../../utils/imageAnalyzer';
+import type { ShapeType } from '../../App';
 import vertShader from '../../glsl/image_voxel.vert?raw';
 import fragShader from '../../glsl/image_voxel.frag?raw';
 
 const MAX_INSTANCES = 30000;
 
+// Scatter layouts mirroring ParticleSwarm's FORMATION shapes.
+function scatterPosition(shape: ShapeType, i: number, total: number): [number, number, number] {
+  switch (shape) {
+    case 'galaxy': {
+      const radius = Math.random() * 15;
+      const spinAngle = radius * 1.5;
+      const branchAngle = (i % 5) * ((Math.PI * 2) / 5);
+      const x = Math.cos(spinAngle + branchAngle) * radius;
+      const z = Math.sin(spinAngle + branchAngle) * radius;
+      const y = (Math.random() - 0.5) * 2.0 * (15.0 - radius) * 0.15;
+      return [x, y, z];
+    }
+    case 'helix': {
+      const t = (i / total) * 100;
+      const branch = (i % 2) * Math.PI;
+      const r = 4;
+      const x = Math.cos(t + branch) * r + (Math.random() - 0.5) * 1.0;
+      const z = Math.sin(t + branch) * r + (Math.random() - 0.5) * 1.0;
+      const y = (t - 50) * 0.25 + (Math.random() - 0.5) * 1.0;
+      return [x, y, z];
+    }
+    case 'torus': {
+      const u = Math.random() * Math.PI * 2;
+      const v = Math.random() * Math.PI * 2;
+      const R = 6;
+      const r = 2 * Math.random();
+      const x = (R + r * Math.cos(v)) * Math.cos(u);
+      const y = r * Math.sin(v) * 1.5;
+      const z = (R + r * Math.cos(v)) * Math.sin(u);
+      return [x, y, z];
+    }
+    case 'amoeba': {
+      const clusterId = i % 30;
+      const cx = (Math.sin(clusterId * 12.9898) * 43758.5453 % 1 - 0.5) * 30;
+      const cy = (Math.sin(clusterId * 78.233) * 43758.5453 % 1 - 0.5) * 30;
+      const cz = (Math.sin(clusterId * 39.346) * 43758.5453 % 1 - 0.5) * 30;
+      const u = Math.random();
+      const v = Math.random();
+      const theta = 2 * Math.PI * u;
+      const phi = Math.acos(2 * v - 1);
+      const r = 4 * Math.pow(Math.random(), 0.3);
+      return [cx + r * Math.sin(phi) * Math.cos(theta), cy + r * Math.sin(phi) * Math.sin(theta), cz + r * Math.cos(phi)];
+    }
+    case 'sphere':
+    default: {
+      const r = 8 + Math.random() * 6;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      return [r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi)];
+    }
+  }
+}
+
 interface ImageVoxelSwarmProps {
   imageFile: File;
+  shape: ShapeType;
   zoom: number;
   voxelResolution: number;
   voxelSpacing: number;
@@ -28,6 +83,7 @@ interface ImageVoxelSwarmProps {
 
 export function ImageVoxelSwarm({
   imageFile,
+  shape,
   zoom,
   voxelResolution,
   voxelSpacing,
@@ -109,11 +165,9 @@ export function ImageVoxelSwarm({
         // Home position: image grid centered at origin, Y flipped (image Y grows downward)
         homeAttr.setXYZ(i, (p.x - half) * cellSize, (half - p.y) * cellSize, 0);
 
-        // Scatter position: random point on a sphere around the origin
-        const r = 8 + Math.random() * 6;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        positionAttr.setXYZ(i, r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
+        // Scatter position: follow the selected FORMATION shape
+        const [sx, sy, sz] = scatterPosition(shape, i, limited.length);
+        positionAttr.setXYZ(i, sx, sy, sz);
 
         color.setRGB(p.r / 255, p.g / 255, p.b / 255);
         colorAttr.setXYZ(i, color.r, color.g, color.b);
@@ -141,7 +195,7 @@ export function ImageVoxelSwarm({
     return () => {
       cancelled = true;
     };
-  }, [imageFile, voxelResolution, voxelSpacing, geometry, color]);
+  }, [imageFile, voxelResolution, voxelSpacing, shape, geometry, color]);
 
   useFrame((state) => {
     const u = shaderRef.current?.uniforms;
