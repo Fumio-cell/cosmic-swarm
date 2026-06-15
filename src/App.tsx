@@ -24,6 +24,20 @@ function App() {
   const [windStrength, setWindStrength] = useState(0.4);
   const [gatherStrength, setGatherStrength] = useState(1.0);
 
+  // When an image is loaded, snap all parameters to the voxel preset so the
+  // viewer immediately gets the "molecules about to break apart" look.
+  function handleImageLoad(file: File | null) {
+    setImageFile(file);
+    if (!file) return;
+    setVoxelResolution(160);
+    setVoxelSpacing(0.5);
+    setWindStrength(0.0);
+    setGatherStrength(1.0);
+    setZoom(0.32);
+    setShape('none');
+    setLiquidFusion(true);
+  }
+
   return (
     <div className="toolkit-wrapper" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
       <Header />
@@ -49,7 +63,7 @@ function App() {
         flicker={flicker} setFlicker={setFlicker}
         particleSize={particleSize} setParticleSize={setParticleSize}
         liquidFusion={liquidFusion} setLiquidFusion={setLiquidFusion}
-        imageFile={imageFile} setImageFile={setImageFile}
+        imageFile={imageFile} setImageFile={handleImageLoad}
         voxelResolution={voxelResolution} setVoxelResolution={setVoxelResolution}
         voxelSpacing={voxelSpacing} setVoxelSpacing={setVoxelSpacing}
         windStrength={windStrength} setWindStrength={setWindStrength}
