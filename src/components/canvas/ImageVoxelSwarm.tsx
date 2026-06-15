@@ -170,9 +170,6 @@ export function ImageVoxelSwarm({
         vertexShader={vertShader}
         fragmentShader={fragShader}
         uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
       />
     </points>
   );
