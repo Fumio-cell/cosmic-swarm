@@ -3,7 +3,7 @@ import { Scene } from './components/canvas/Scene';
 import { OverlayHUD } from './components/ui/OverlayHUD';
 import { Header } from './components/ui/Header';
 
-export type ShapeType = 'galaxy' | 'sphere' | 'helix' | 'torus' | 'amoeba';
+export type ShapeType = 'none' | 'galaxy' | 'sphere' | 'torus' | 'amoeba';
 
 function App() {
   const [reactiveness, setReactiveness] = useState(1.0);

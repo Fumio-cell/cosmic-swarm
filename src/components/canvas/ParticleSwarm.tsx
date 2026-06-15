@@ -25,7 +25,7 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       let x = 0, y = 0, z = 0;
       
-      if (shape === 'galaxy') {
+      if (shape === 'none' || shape === 'galaxy') {
         const radius = Math.random() * 15;
         const spinAngle = radius * 1.5; 
         const branchAngle = (i % 5) * ((Math.PI * 2) / 5); 
@@ -39,13 +39,6 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
         x = r * Math.sin(phi) * Math.cos(theta);
         y = r * Math.sin(phi) * Math.sin(theta);
         z = r * Math.cos(phi);
-      } else if (shape === 'helix') {
-        const t = (i / PARTICLE_COUNT) * 100;
-        const branch = (i % 2) * Math.PI;
-        const r = 4;
-        x = Math.cos(t + branch) * r + (Math.random() - 0.5) * 1.0;
-        z = Math.sin(t + branch) * r + (Math.random() - 0.5) * 1.0;
-        y = (t - 50) * 0.25 + (Math.random() - 0.5) * 1.0; // Reduced height spread
       } else if (shape === 'torus') {
         const u = Math.random() * Math.PI * 2;
         const v = Math.random() * Math.PI * 2;

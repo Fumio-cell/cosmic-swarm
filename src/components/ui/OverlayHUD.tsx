@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { videoRecorder } from '../../utils/VideoRecorder';
-import { Play, Pause, Upload, Settings, Video, Aperture, Circle, Dna, LifeBuoy, Droplets, X } from 'lucide-react';
+import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban } from 'lucide-react';
 import type { ShapeType } from '../../App';
 
 interface OverlayHUDProps {
@@ -233,22 +233,31 @@ export function OverlayHUD({
           <div className="shape-selector">
             <label>FORMATION</label>
             <div className="shape-buttons">
-              {(['galaxy', 'sphere', 'helix', 'torus', 'amoeba'] as ShapeType[]).map((s) => {
+              {(['none', 'galaxy', 'sphere', 'torus', 'amoeba'] as ShapeType[]).map((s) => {
                 const getIcon = () => {
                   switch(s) {
+                    case 'none':   return <Ban size={18} />;
                     case 'galaxy': return <Aperture size={18} />;
                     case 'sphere': return <Circle size={18} />;
-                    case 'helix': return <Dna size={18} />;
-                    case 'torus': return <LifeBuoy size={18} />;
+                    case 'torus':  return <LifeBuoy size={18} />;
                     case 'amoeba': return <Droplets size={18} />;
                   }
                 };
+                const getTitle = () => {
+                  switch(s) {
+                    case 'none':   return 'なし';
+                    case 'galaxy': return 'ユニバース';
+                    case 'sphere': return '球体';
+                    case 'torus':  return 'ドーナツ';
+                    case 'amoeba': return '水的';
+                  }
+                };
                 return (
-                  <button 
-                    key={s} 
+                  <button
+                    key={s}
                     className={`shape-btn ${shape === s ? 'active' : ''}`}
                     onClick={() => setShape(s)}
-                    title={s.toUpperCase()}
+                    title={getTitle()}
                   >
                     {getIcon()}
                   </button>

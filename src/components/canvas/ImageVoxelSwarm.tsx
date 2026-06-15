@@ -10,8 +10,14 @@ import fragShader from '../../glsl/image_voxel.frag?raw';
 const MAX_INSTANCES = 30000;
 
 // Scatter layouts mirroring ParticleSwarm's FORMATION shapes.
-function scatterPosition(shape: ShapeType, i: number, total: number): [number, number, number] {
+function scatterPosition(shape: ShapeType, i: number, _total: number): [number, number, number] {
   switch (shape) {
+    case 'none': {
+      const r = 8 + Math.random() * 6;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      return [r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi)];
+    }
     case 'galaxy': {
       const radius = Math.random() * 15;
       const spinAngle = radius * 1.5;
@@ -19,15 +25,6 @@ function scatterPosition(shape: ShapeType, i: number, total: number): [number, n
       const x = Math.cos(spinAngle + branchAngle) * radius;
       const z = Math.sin(spinAngle + branchAngle) * radius;
       const y = (Math.random() - 0.5) * 2.0 * (15.0 - radius) * 0.15;
-      return [x, y, z];
-    }
-    case 'helix': {
-      const t = (i / total) * 100;
-      const branch = (i % 2) * Math.PI;
-      const r = 4;
-      const x = Math.cos(t + branch) * r + (Math.random() - 0.5) * 1.0;
-      const z = Math.sin(t + branch) * r + (Math.random() - 0.5) * 1.0;
-      const y = (t - 50) * 0.25 + (Math.random() - 0.5) * 1.0;
       return [x, y, z];
     }
     case 'torus': {
@@ -73,7 +70,7 @@ function hash(i: number, seed: number): number {
 // can be reshaped into galaxy/helix/torus/amoeba layouts while keeping their
 // original per-pixel colors. `scale` matches the shape's extent to the
 // image's normal on-screen size.
-function shapeHomePosition(shape: ShapeType, i: number, total: number, scale: number): [number, number, number] {
+function shapeHomePosition(shape: ShapeType, i: number, _total: number, scale: number): [number, number, number] {
   switch (shape) {
     case 'galaxy': {
       const radius = hash(i, 1) * 15;
@@ -82,15 +79,6 @@ function shapeHomePosition(shape: ShapeType, i: number, total: number, scale: nu
       const x = Math.cos(spinAngle + branchAngle) * radius;
       const z = Math.sin(spinAngle + branchAngle) * radius;
       const y = (hash(i, 2) - 0.5) * 2.0 * (15.0 - radius) * 0.15;
-      return [x * scale, y * scale, z * scale];
-    }
-    case 'helix': {
-      const t = (i / total) * 100;
-      const branch = (i % 2) * Math.PI;
-      const r = 4;
-      const x = Math.cos(t + branch) * r + (hash(i, 3) - 0.5) * 1.0;
-      const z = Math.sin(t + branch) * r + (hash(i, 4) - 0.5) * 1.0;
-      const y = (t - 50) * 0.25 + (hash(i, 5) - 0.5) * 1.0;
       return [x * scale, y * scale, z * scale];
     }
     case 'torus': {
@@ -118,6 +106,7 @@ function shapeHomePosition(shape: ShapeType, i: number, total: number, scale: nu
       const z = cz + r * Math.cos(phi);
       return [x * scale, y * scale, z * scale];
     }
+    case 'none':
     case 'sphere':
     default: {
       const r = 8 + hash(i, 12) * 6;
@@ -225,9 +214,9 @@ export function ImageVoxelSwarm({
       for (let i = 0; i < limited.length; i++) {
         const p = limited[i];
 
-        // Home position: image grid centered at origin, Y flipped (image Y grows downward),
-        // or reshaped onto the selected FORMATION for non-sphere shapes.
-        if (shape === 'sphere') {
+        // Home position: original photo grid for 'none'/'sphere', or reshaped onto
+        // the selected FORMATION so abstract images can wear different shapes.
+        if (shape === 'none' || shape === 'sphere') {
           homeAttr.setXYZ(i, (p.x - half) * cellSize, (half - p.y) * cellSize, 0);
         } else {
           const shapeScale = (half * cellSize) / 8;
