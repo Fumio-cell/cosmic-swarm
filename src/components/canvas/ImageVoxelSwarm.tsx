@@ -102,10 +102,7 @@ export function ImageVoxelSwarm({
   const pointsRef = useRef<THREE.Points>(null);
   const shaderRef = useRef<THREE.ShaderMaterial>(null);
   const color = useMemo(() => new THREE.Color(), []);
-  // On import, show the photo fully formed first, then let it break apart
-  // over a few seconds, settling onto the GATHER slider's target.
   const currentGather = useRef(1.0);
-  const breakupStart = useRef<number | null>(null);
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -186,10 +183,6 @@ export function ImageVoxelSwarm({
       geometry.setDrawRange(0, limited.length);
       geometry.computeBoundingSphere();
 
-      // Reset to a fully-formed photo on import; it will automatically
-      // break apart over the next few seconds in the animation loop below.
-      currentGather.current = 1.0;
-      breakupStart.current = null;
     });
 
     return () => {
@@ -212,19 +205,9 @@ export function ImageVoxelSwarm({
     u.uLiquidFusion.value = liquidFusion ? 1.0 : 0.0;
     u.uBass.value = audioAnalyzer.bass;
     u.uTreble.value = audioAnalyzer.treble;
-    // Hold the fully-formed photo for a beat, then break it apart down to
-    // the GATHER slider's target, independent of the slider's value.
-    if (breakupStart.current === null) {
-      breakupStart.current = state.clock.elapsedTime;
-    }
-    const elapsed = state.clock.elapsedTime - breakupStart.current;
-    const holdTime = 1.5;
-    const breakupDuration = 3.0;
-    const breakupProgress = THREE.MathUtils.clamp((elapsed - holdTime) / breakupDuration, 0, 1);
-    // GATHER fully controls the rest state: 100% reassembles the original photo.
-    const restGather = THREE.MathUtils.clamp(gatherStrength, 0, 1);
-    const targetGather = THREE.MathUtils.lerp(1.0, restGather, breakupProgress);
-    currentGather.current = THREE.MathUtils.lerp(currentGather.current, targetGather, 0.03);
+    // GATHER directly controls the blend between scattered and image layout.
+    const targetGather = THREE.MathUtils.clamp(gatherStrength, 0, 1);
+    currentGather.current = THREE.MathUtils.lerp(currentGather.current, targetGather, 0.05);
     u.uGather.value = currentGather.current;
     u.uWind.value = windStrength;
 
