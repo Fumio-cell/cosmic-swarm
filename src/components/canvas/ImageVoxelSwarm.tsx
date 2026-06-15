@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { analyzeImagePixels } from '../../utils/imageAnalyzer';
 import vertShader from '../../glsl/image_voxel.vert?raw';
-import fragShader from '../../glsl/particle.frag?raw';
+import fragShader from '../../glsl/image_voxel.frag?raw';
 
 const MAX_INSTANCES = 30000;
 
@@ -112,7 +112,7 @@ export function ImageVoxelSwarm({
         color.setRGB(p.r / 255, p.g / 255, p.b / 255);
         colorAttr.setXYZ(i, color.r, color.g, color.b);
 
-        sizeAttr.setX(i, Math.random() * 0.2 + 0.05);
+        sizeAttr.setX(i, Math.random() * 0.4 + 0.4);
         audioIndexAttr.setX(i, Math.random());
       }
 
