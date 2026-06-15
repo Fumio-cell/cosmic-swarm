@@ -136,9 +136,11 @@ h1 {
 
 .dropzone p {
   font-family: var(--font-mono);
-  font-size: 0.9rem;
-  margin-top: 1rem;
+  font-size: 0.7rem;
+  margin-top: 0.6rem;
   margin-bottom: 0.2rem;
+  padding: 0 0.5rem;
+  text-align: center;
 }
 
 .dropzone .sub-text {
