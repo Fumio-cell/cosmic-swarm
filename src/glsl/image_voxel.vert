@@ -10,6 +10,7 @@ uniform float uBass;
 uniform float uTreble;
 uniform float uGather;
 uniform float uWind;
+uniform float uCellPx;
 
 attribute vec3 aHome;
 attribute vec3 aColor;
@@ -76,8 +77,10 @@ void main() {
 
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
 
-  float pSize = aSize * (50.0 / max(-mvPosition.z, 0.1)) * (1.0 + audioValue * 2.0 * uFlicker) * uParticleSize;
+  // uCellPx is the target pixel size for one grid cell, computed per-frame on
+  // the CPU from viewport size, zoom scale, and camera depth — no magic constants.
+  float pSize = uCellPx * (1.0 + audioValue * 2.0 * uFlicker) * uParticleSize;
   float fusionScale = mix(1.0, 2.5, uLiquidFusion);
-  gl_PointSize = clamp(pSize * fusionScale, 3.0, 800.0);
+  gl_PointSize = clamp(pSize * fusionScale, 1.0, 800.0);
   gl_Position = projectionMatrix * mvPosition;
 }

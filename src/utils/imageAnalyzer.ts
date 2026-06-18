@@ -14,7 +14,8 @@ export interface VoxelPixel {
 export async function analyzeImagePixels(
   file: File,
   resolution: number,
-  alphaThreshold = 10
+  alphaThreshold = 10,
+  brightnessThreshold = 15
 ): Promise<VoxelPixel[]> {
   const imageBitmap = await loadImage(file);
 
@@ -33,7 +34,9 @@ export async function analyzeImagePixels(
       const i = (y * resolution + x) * 4;
       const a = data[i + 3];
       if (a < alphaThreshold) continue;
-      pixels.push({ x, y, r: data[i], g: data[i + 1], b: data[i + 2], a });
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      if (Math.max(r, g, b) < brightnessThreshold) continue;
+      pixels.push({ x, y, r, g, b, a });
     }
   }
 

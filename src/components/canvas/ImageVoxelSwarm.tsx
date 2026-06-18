@@ -158,6 +158,7 @@ export function ImageVoxelSwarm({
   const shaderRef = useRef<THREE.ShaderMaterial>(null);
   const color = useMemo(() => new THREE.Color(), []);
   const currentGather = useRef(1.0);
+  const cellSizeRef = useRef(1.0);
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -186,6 +187,7 @@ export function ImageVoxelSwarm({
     uTreble: { value: 0.0 },
     uGather: { value: gatherStrength },
     uWind: { value: windStrength },
+    uCellPx: { value: 4.0 },
   }), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -228,12 +230,13 @@ export function ImageVoxelSwarm({
         const [sx, sy, sz] = scatterPosition(shape, i, limited.length);
         positionAttr.setXYZ(i, sx, sy, sz);
 
-        // Canvas pixels are sRGB; convert to linear so Three.js renders true colours.
-        color.setRGB(p.r / 255, p.g / 255, p.b / 255).convertSRGBToLinear();
+        // Convert sRGB pixel values to linear so the renderer's sRGB output stage
+        // doesn't double-compress colors, which washes out and darkens the image.
+        color.setRGB(p.r / 255, p.g / 255, p.b / 255, THREE.SRGBColorSpace);
         colorAttr.setXYZ(i, color.r, color.g, color.b);
 
-        // Slight overlap (×2.4) fills the black grid gaps without blurring detail.
-        sizeAttr.setX(i, cellSize * 2.4);
+          sizeAttr.setX(i, 1.0); // placeholder; actual screen size is driven by uCellPx
+        cellSizeRef.current = cellSize;
         audioIndexAttr.setX(i, Math.random());
       }
 
@@ -279,7 +282,16 @@ export function ImageVoxelSwarm({
 
     if (pointsRef.current) {
       const targetScale = 0.15 + (zoom * zoom * 14.85);
-      pointsRef.current.scale.setScalar(THREE.MathUtils.lerp(pointsRef.current.scale.x, targetScale, 0.05));
+      const s = THREE.MathUtils.lerp(pointsRef.current.scale.x, targetScale, 0.05);
+      pointsRef.current.scale.setScalar(s);
+
+      // Compute the pixel footprint of one grid cell based on current viewport,
+      // zoom scale, and camera depth so points fill the grid with no gaps.
+      const halfFovTan = Math.tan((Math.PI / 180 * 45) / 2);
+      // Use physical pixels (CSS px * DPR) because gl_PointSize is in device pixels.
+      const dpr = state.gl.getPixelRatio();
+      const pxPerWorldUnit = (state.size.height * dpr / 2) / halfFovTan / 20;
+      u.uCellPx.value = cellSizeRef.current * s * pxPerWorldUnit * 1.05;
     }
   });
 
