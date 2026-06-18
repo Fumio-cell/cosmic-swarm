@@ -30,7 +30,7 @@ function App() {
     setImageFile(file);
     if (!file) return;
     setVoxelResolution(160);
-    setVoxelSpacing(0.5);
+    setVoxelSpacing(1.0);
     setWindStrength(0.0);
     setGatherStrength(1.0);
     setZoom(0.35);

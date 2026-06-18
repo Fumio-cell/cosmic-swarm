@@ -158,7 +158,9 @@ export function ImageVoxelSwarm({
   const shaderRef = useRef<THREE.ShaderMaterial>(null);
   const color = useMemo(() => new THREE.Color(), []);
   const currentGather = useRef(1.0);
-  const cellSizeRef = useRef(1.0);
+  // pixelSizeRef: world-space size of one pixel at spacing=1 (used for gl_PointSize).
+  // Kept separate from cellSize so VOXEL SPACING only moves pixels apart, not scales them.
+  const pixelSizeRef = useRef(1.0);
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -209,9 +211,13 @@ export function ImageVoxelSwarm({
       const audioIndexAttr = geometry.getAttribute('aAudioIndex') as THREE.BufferAttribute;
 
       const half = clampedResolution / 2;
-      // Keep the overall image size roughly constant regardless of resolution,
-      // so higher resolutions add detail instead of expanding off-screen.
-      const cellSize = voxelSpacing * (16 / clampedResolution);
+      // pixelSize: world-space size of one pixel block at spacing=1.
+      // cellSize: actual spacing between pixel centers (includes voxelSpacing).
+      // Keeping them separate lets VOXEL SPACING spread pixels apart without
+      // changing their visual size — so it expands the image in 3D space.
+      const pixelSize = 16 / clampedResolution;
+      const cellSize = voxelSpacing * pixelSize;
+      pixelSizeRef.current = pixelSize;
 
       for (let i = 0; i < limited.length; i++) {
         const p = limited[i];
@@ -235,8 +241,7 @@ export function ImageVoxelSwarm({
         color.setRGB(p.r / 255, p.g / 255, p.b / 255, THREE.SRGBColorSpace);
         colorAttr.setXYZ(i, color.r, color.g, color.b);
 
-          sizeAttr.setX(i, 1.0); // placeholder; actual screen size is driven by uCellPx
-        cellSizeRef.current = cellSize;
+        sizeAttr.setX(i, 1.0); // placeholder; actual screen size is driven by uCellPx
         audioIndexAttr.setX(i, Math.random());
       }
 
@@ -285,13 +290,13 @@ export function ImageVoxelSwarm({
       const s = THREE.MathUtils.lerp(pointsRef.current.scale.x, targetScale, 0.05);
       pointsRef.current.scale.setScalar(s);
 
-      // Compute the pixel footprint of one grid cell based on current viewport,
-      // zoom scale, and camera depth so points fill the grid with no gaps.
+      // Compute pixel footprint of one pixel block (at spacing=1) so points
+      // tile the image with no gaps regardless of zoom or resolution.
+      // gl_PointSize is in physical pixels, so multiply height by DPR.
       const halfFovTan = Math.tan((Math.PI / 180 * 45) / 2);
-      // Use physical pixels (CSS px * DPR) because gl_PointSize is in device pixels.
       const dpr = state.gl.getPixelRatio();
       const pxPerWorldUnit = (state.size.height * dpr / 2) / halfFovTan / 20;
-      u.uCellPx.value = cellSizeRef.current * s * pxPerWorldUnit * 1.05;
+      u.uCellPx.value = pixelSizeRef.current * s * pxPerWorldUnit * 1.05;
     }
   });
 
