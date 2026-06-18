@@ -330,7 +330,7 @@ export function OverlayHUD({
             <label>PARTICLE SIZE</label>
             <input 
               type="range" 
-              min="0.5" max="30.0" step="0.1" 
+              min="0.1" max="10.0" step="0.1"
               value={particleSize}
               onChange={(e) => setParticleSize(parseFloat(e.target.value))}
             />

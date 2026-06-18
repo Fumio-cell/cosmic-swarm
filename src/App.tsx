@@ -38,7 +38,7 @@ function App() {
     setLiquidFusion(false);
     setReactiveness(2.0);
     setBrightness(1.8);
-    setParticleSize(0.5);
+    setParticleSize(0.3);
     setRotationSpeed(0.0);
   }
 
