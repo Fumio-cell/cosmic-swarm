@@ -228,12 +228,12 @@ export function ImageVoxelSwarm({
         const [sx, sy, sz] = scatterPosition(shape, i, limited.length);
         positionAttr.setXYZ(i, sx, sy, sz);
 
-        color.setRGB(p.r / 255, p.g / 255, p.b / 255);
+        // Canvas pixels are sRGB; convert to linear so Three.js renders true colours.
+        color.setRGB(p.r / 255, p.g / 255, p.b / 255).convertSRGBToLinear();
         colorAttr.setXYZ(i, color.r, color.g, color.b);
 
-        // Scale particle size with cell size so higher resolutions show crisper,
-        // less-overlapping detail instead of washing out into a blurred mass.
-        sizeAttr.setX(i, (Math.random() * 0.4 + 1.2) * cellSize * 2.0);
+        // Slight overlap (×2.4) fills the black grid gaps without blurring detail.
+        sizeAttr.setX(i, cellSize * 2.4);
         audioIndexAttr.setX(i, Math.random());
       }
 

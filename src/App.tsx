@@ -29,13 +29,16 @@ function App() {
   function handleImageLoad(file: File | null) {
     setImageFile(file);
     if (!file) return;
-    setVoxelResolution(160);
+    setVoxelResolution(100);
     setVoxelSpacing(0.5);
     setWindStrength(0.0);
     setGatherStrength(1.0);
     setZoom(0.32);
     setShape('none');
-    setLiquidFusion(true);
+    setLiquidFusion(false);
+    setReactiveness(2.0);
+    setBrightness(1.3);
+    setRotationSpeed(0.0);
   }
 
   return (
