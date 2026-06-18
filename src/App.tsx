@@ -33,11 +33,12 @@ function App() {
     setVoxelSpacing(0.5);
     setWindStrength(0.0);
     setGatherStrength(1.0);
-    setZoom(0.32);
+    setZoom(0.35);
     setShape('none');
     setLiquidFusion(false);
     setReactiveness(2.0);
-    setBrightness(1.3);
+    setBrightness(1.8);
+    setParticleSize(0.5);
     setRotationSpeed(0.0);
   }
 
