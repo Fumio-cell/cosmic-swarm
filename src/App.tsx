@@ -29,7 +29,7 @@ function App() {
   function handleImageLoad(file: File | null) {
     setImageFile(file);
     if (!file) return;
-    setVoxelResolution(100);
+    setVoxelResolution(160);
     setVoxelSpacing(0.5);
     setWindStrength(0.0);
     setGatherStrength(1.0);
