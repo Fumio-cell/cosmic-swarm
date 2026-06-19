@@ -126,7 +126,7 @@ export function OverlayHUD({
     setIsPlaying(true);
     setIsRecording(true);
     
-    videoRecorder.startRecording(canvas);
+    videoRecorder.startRecording(canvas, audioAnalyzer.getAudioStream());
   };
 
   return (

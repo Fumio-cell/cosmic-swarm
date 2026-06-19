@@ -2,24 +2,33 @@ export class VideoRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
 
-  public startRecording(canvas: HTMLCanvasElement) {
+  public startRecording(canvas: HTMLCanvasElement, audioStream?: MediaStream | null) {
     this.recordedChunks = [];
 
     // Capture WebGL video stream (at 60fps)
     const videoStream = canvas.captureStream(60);
 
-    // Try to use VP9 or VP8 for WebM
-    let mimeType = 'video/webm;codecs=vp9';
+    // Merge audio tracks into the video stream when available
+    if (audioStream) {
+      audioStream.getAudioTracks().forEach((track) => videoStream.addTrack(track));
+    }
+
+    // Try VP9 with Opus audio first (best quality WebM), fall back gracefully
+    let mimeType = 'video/webm;codecs=vp9,opus';
     if (!MediaRecorder.isTypeSupported(mimeType)) {
-      mimeType = 'video/webm;codecs=vp8';
+      mimeType = 'video/webm;codecs=vp9';
       if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm'; // Fallback
+        mimeType = 'video/webm;codecs=vp8,opus';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm';
+        }
       }
     }
 
     this.mediaRecorder = new MediaRecorder(videoStream, {
       mimeType,
-      videoBitsPerSecond: 250000000, // 250 Mbps for Ultra High Quality
+      videoBitsPerSecond: 250000000, // 250 Mbps video
+      audioBitsPerSecond: 320000,    // 320 kbps audio (high quality)
     });
 
     this.mediaRecorder.ondataavailable = (event) => {
