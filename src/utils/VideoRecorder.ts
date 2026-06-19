@@ -50,6 +50,15 @@ export class VideoRecorder {
     }
   }
 
+  public cancelRecording() {
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      // Suppress the onstop download by clearing the handler before stopping.
+      this.mediaRecorder.onstop = null;
+      this.mediaRecorder.stop();
+    }
+    this.recordedChunks = [];
+  }
+
   private downloadVideo() {
     const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
     const url = URL.createObjectURL(blob);

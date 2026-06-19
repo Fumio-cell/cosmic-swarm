@@ -235,6 +235,27 @@ h1 {
   100% { opacity: 1; }
 }
 
+.cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1px solid rgba(255, 51, 102, 0.5);
+  color: rgba(255, 51, 102, 0.8);
+  padding: 0.3rem 0.75rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 51, 102, 0.15);
+  border-color: #ff3366;
+  color: #ff3366;
+}
+
 .parameter-panel {
   position: absolute;
   right: 2rem;

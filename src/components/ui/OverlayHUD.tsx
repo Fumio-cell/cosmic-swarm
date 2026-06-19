@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { videoRecorder } from '../../utils/VideoRecorder';
-import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban } from 'lucide-react';
+import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle } from 'lucide-react';
 import type { ShapeType } from '../../App';
 
 interface OverlayHUDProps {
@@ -116,6 +116,14 @@ export function OverlayHUD({
     setIsPlaying(audioAnalyzer.isPlaying());
   };
 
+  const cancelRender = () => {
+    videoRecorder.cancelRecording();
+    audioAnalyzer.audio.pause();
+    audioAnalyzer.audio.currentTime = 0;
+    setIsRecording(false);
+    setIsPlaying(false);
+  };
+
   const startRender = async () => {
     const canvas = document.querySelector('canvas');
     
@@ -160,6 +168,13 @@ export function OverlayHUD({
               <Video size={20} />
               {isRecording ? 'RECORDING...' : 'RENDER VIDEO'}
             </button>
+
+            {isRecording && (
+              <button className="cancel-btn" onClick={cancelRender}>
+                <XCircle size={16} />
+                CANCEL
+              </button>
+            )}
 
             <button className="play-btn" onClick={togglePlay} disabled={isRecording}>
               {isPlaying ? <Pause size={24} /> : <Play size={24} />}
