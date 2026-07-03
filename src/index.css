@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;500;700&display=swap');
 
 :root {
   --neon-green: #00ff88;
@@ -8,6 +8,10 @@
   --border: rgba(0, 255, 136, 0.2);
   --font-mono: 'Space Mono', monospace;
   --font-sans: 'Inter', sans-serif;
+  --font-display: 'Fraunces', serif;
+  --suoh: #9E3D3F;
+  --suoh-dim: rgba(158, 61, 63, 0.2);
+  --nav-accent: var(--suoh);
 }
 
 * {

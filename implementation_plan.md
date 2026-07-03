@@ -1,10 +1,10 @@
 # Cosmic-Swarm 画像ボクセル化モード 実装計画
 
 ## 0. 目的と背景
-既存のCosmic-Swarm（内部名 Neural-Swarm）に「画像ボクセル化モード」を追加します。画像を読み込み、ダウンサンプリングして立体キューブ（ボクセル）の群れに変換し、Swarmの力学で漂わせる機能です。「散ったSwarm ⇄ 集まって元画像になる」という二状態を行き来できるようにします。
+既存のCosmic-Swarm（内部名 Seed-Signal）に「画像ボクセル化モード」を追加します。画像を読み込み、ダウンサンプリングして立体キューブ（ボクセル）の群れに変換し、Swarmの力学で漂わせる機能です。「散ったSwarm ⇄ 集まって元画像になる」という二状態を行き来できるようにします。
 
 ## 1. 現状調査の報告（フェーズ0結果）
-`/Volumes/2TB/Antigravity/Neural-Swarm` のコードを調査しました。
+`/Volumes/2TB/Antigravity/Seed-Signal` のコードを調査しました。
 - **描画プリミティブ**: 現在は `THREE.Points` + `BufferGeometry` + `ShaderMaterial` を使用しています（`ParticleSwarm.tsx`）。
 - **更新ループと力学計算**: Swarmの位置更新（風、カオス、オーディオリアクションなど）は、JS側で `velocity` や `force` を保持する仕組みではなく、すべて**頂点シェーダー (`src/glsl/particle.vert`)** 内でのプロシージャル計算で行われています。
 - **UI実装方式**: `lil-gui` は使用しておらず、`App.tsx` の `useState` を用いて独自コンポーネント（`OverlayHUD.tsx`）でスライダーUI（`<input type="range">`）を構築しています。
