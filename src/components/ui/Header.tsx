@@ -1,20 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-// import { supabase } from '../lib/commercial'; // Mocked or removed if not using commercial auth yet
-import { LogIn, LogOut, Zap, Info, X } from 'lucide-react';
+import { Info, X } from 'lucide-react';
+import { DEMO_MODE } from '../../config';
 
 export const Header: React.FC = () => {
-    const [user, setUser] = useState<any>(null);
     const [showInfo, setShowInfo] = useState(false);
-
-    useEffect(() => {
-        // Mocking Pro status for now, since this app is local/standalone
-        const finalPro = true;
-        (window as any).__isPro = finalPro;
-    }, []);
-
-    const login = () => { console.log('Login not implemented in standalone yet'); };
-    const logout = () => { setUser(null); };
 
     return (
         <header className="toolkit-header">
@@ -36,28 +26,8 @@ export const Header: React.FC = () => {
             </div>
 
             <div className="header-right">
-                {user ? (
-                    <div className="user-profile">
-                        <div className="pro-badge active">
-                            <Zap className="w-3 h-3" />
-                            PRO
-                        </div>
-                        <span className="user-email">{user.email}</span>
-                        <button onClick={logout} className="icon-btn" title="Logout">
-                            <LogOut className="w-4 h-4" />
-                        </button>
-                    </div>
-                ) : (
-                    <div className="user-profile">
-                        <div className="pro-badge active">
-                            <Zap className="w-3 h-3" />
-                            PRO
-                        </div>
-                        <span className="user-email">Local Mode</span>
-                        <button onClick={login} className="icon-btn" title="Login for Sync">
-                            <LogIn className="w-4 h-4" />
-                        </button>
-                    </div>
+                {DEMO_MODE && (
+                    <div className="preview-badge">FREE PREVIEW</div>
                 )}
             </div>
 
@@ -111,54 +81,19 @@ export const Header: React.FC = () => {
                     font-weight: 600;
                     letter-spacing: -0.01em;
                 }
-                .user-profile {
+                .preview-badge {
                     display: flex;
                     align-items: center;
-                    gap: 0.75rem;
-                    background: rgba(255, 255, 255, 0.06);
-                    padding: 0.35rem 0.5rem 0.35rem 0.75rem;
-                    border-radius: 9999px;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                }
-                .pro-badge {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.25rem;
                     font-size: 0.7rem;
-                    font-weight: 800;
-                    padding: 0.2rem 0.5rem;
+                    font-weight: 700;
+                    padding: 0.25rem 0.65rem;
                     border-radius: 9999px;
-                    background: rgba(255, 255, 255, 0.1);
-                    color: #94a3b8;
-                    letter-spacing: 0.05em;
+                    background: rgba(255, 255, 255, 0.08);
+                    border: 1px solid rgba(255, 255, 255, 0.18);
+                    color: rgba(255, 255, 255, 0.75);
+                    letter-spacing: 0.08em;
                 }
-                .pro-badge.active {
-                    background: #f59e0b;
-                    color: #fff;
-                    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
-                }
-                .user-email {
-                    font-size: 0.85rem;
-                    color: rgba(255, 255, 255, 0.9);
-                    font-weight: 500;
-                    letter-spacing: 0.01em;
-                }
-                .icon-btn {
-                    background: none;
-                    border: none;
-                    color: rgba(255, 255, 255, 0.5);
-                    cursor: pointer;
-                    padding: 0.4rem;
-                    display: flex;
-                    align-items: center;
-                    border-radius: 50%;
-                    transition: all 0.2s ease;
-                }
-                .icon-btn:hover {
-                    color: #fff;
-                    background: rgba(255, 255, 255, 0.1);
-                }
-           
+
                 .info-modal-overlay {
                     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
                     background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
