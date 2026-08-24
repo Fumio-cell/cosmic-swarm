@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { videoRecorder } from '../../utils/VideoRecorder';
+import { DEMO_MODE, DEMO_MAX_SECONDS } from '../../config';
 import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle } from 'lucide-react';
 import type { ShapeType } from '../../App';
 
@@ -62,6 +63,7 @@ export function OverlayHUD({
 }: OverlayHUDProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [demoLimitReached, setDemoLimitReached] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -126,15 +128,30 @@ export function OverlayHUD({
 
   const startRender = async () => {
     const canvas = document.querySelector('canvas');
-    
+
     if (!canvas) return;
-    
+
     audioAnalyzer.audio.currentTime = 0;
     await audioAnalyzer.audio.play();
     setIsPlaying(true);
     setIsRecording(true);
-    
-    videoRecorder.startRecording(canvas, audioAnalyzer.getAudioStream());
+    setDemoLimitReached(false);
+
+    if (DEMO_MODE) {
+      videoRecorder.startRecording(
+        canvas,
+        audioAnalyzer.getAudioStream(),
+        DEMO_MAX_SECONDS * 1000,
+        () => {
+          audioAnalyzer.audio.pause();
+          setIsRecording(false);
+          setIsPlaying(false);
+          setDemoLimitReached(true);
+        }
+      );
+    } else {
+      videoRecorder.startRecording(canvas, audioAnalyzer.getAudioStream());
+    }
   };
 
   return (
@@ -166,7 +183,11 @@ export function OverlayHUD({
 
             <button className={`render-btn ${isRecording ? 'recording' : ''}`} onClick={startRender} disabled={isRecording}>
               <Video size={20} />
-              {isRecording ? 'RECORDING...' : 'RENDER VIDEO'}
+              {isRecording
+                ? 'RECORDING...'
+                : DEMO_MODE
+                  ? `RENDER VIDEO (${DEMO_MAX_SECONDS}S PREVIEW)`
+                  : 'RENDER VIDEO'}
             </button>
 
             {isRecording && (
@@ -174,6 +195,13 @@ export function OverlayHUD({
                 <XCircle size={16} />
                 CANCEL
               </button>
+            )}
+
+            {demoLimitReached && (
+              <div className="demo-limit-notice">
+                {DEMO_MAX_SECONDS}s preview limit reached. Full-length export is
+                available in the full version — see the Poetic Signal Toolkit.
+              </div>
             )}
 
             <button className="play-btn" onClick={togglePlay} disabled={isRecording}>

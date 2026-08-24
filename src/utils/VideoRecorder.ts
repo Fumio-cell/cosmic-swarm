@@ -1,9 +1,16 @@
 export class VideoRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
+  private autoStopTimer: ReturnType<typeof setTimeout> | null = null;
 
-  public startRecording(canvas: HTMLCanvasElement, audioStream?: MediaStream | null) {
+  public startRecording(
+    canvas: HTMLCanvasElement,
+    audioStream?: MediaStream | null,
+    maxDurationMs?: number,
+    onAutoStop?: () => void
+  ) {
     this.recordedChunks = [];
+    this.clearAutoStopTimer();
 
     // Capture WebGL video stream (at 60fps)
     const videoStream = canvas.captureStream(60);
@@ -42,15 +49,34 @@ export class VideoRecorder {
     };
 
     this.mediaRecorder.start();
+
+    // Demo builds cap export length; the recording still saves normally,
+    // it just stops itself early and tells the caller it did.
+    if (maxDurationMs !== undefined) {
+      this.autoStopTimer = setTimeout(() => {
+        this.autoStopTimer = null;
+        this.stopRecording();
+        onAutoStop?.();
+      }, maxDurationMs);
+    }
+  }
+
+  private clearAutoStopTimer() {
+    if (this.autoStopTimer !== null) {
+      clearTimeout(this.autoStopTimer);
+      this.autoStopTimer = null;
+    }
   }
 
   public stopRecording() {
+    this.clearAutoStopTimer();
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop();
     }
   }
 
   public cancelRecording() {
+    this.clearAutoStopTimer();
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       // Suppress the onstop download by clearing the handler before stopping.
       this.mediaRecorder.onstop = null;
