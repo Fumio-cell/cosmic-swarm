@@ -29,7 +29,7 @@ void main() {
   // Audio increases brightness and intensity
   vec3 finalColor = desaturatedColor * (1.0 + vAudioValue * 1.5 * uFlicker) * uBrightness;
   
-  float baseAlpha = (0.5 - dist) * 2.0;
+  float baseAlpha = 1.0 - smoothstep(0.0, 0.5, dist);
   // A wide, massive, soft bell-curve that bleeds out to the edge for maximum overlap
   float fusionAlpha = exp(-dist * dist * 12.0);
   float alpha = mix(baseAlpha, fusionAlpha, uLiquidFusion);

@@ -73,7 +73,7 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
       positions[i * 3 + 2] = z;
 
       // Random color blend
-      mixedColor.copy(baseColor).lerp(accentColor, Math.random());
+      mixedColor.copy(baseColor).lerpHSL(accentColor, Math.random());
       colors[i * 3] = mixedColor.r;
       colors[i * 3 + 1] = mixedColor.g;
       colors[i * 3 + 2] = mixedColor.b;
