@@ -75,7 +75,7 @@ export function Scene({ reactiveness, zoom, hueShift, rotationSpeed, chaos, shap
           </EffectComposer>
         ) : (
           <EffectComposer>
-            <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} height={300} intensity={1.2} />
+            <Bloom luminanceThreshold={0.15} luminanceSmoothing={0.7} height={480} intensity={1.5} />
           </EffectComposer>
         )}
       </Canvas>
