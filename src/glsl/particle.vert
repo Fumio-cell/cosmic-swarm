@@ -11,9 +11,11 @@ uniform float uTreble;
 
 attribute float aSize;
 attribute vec3 aColor;
+attribute float aOpacity;
 attribute float aAudioIndex;
 
 varying vec3 vColor;
+varying float vOpacity;
 varying float vAudioValue;
 varying float vDepth;
 
@@ -25,6 +27,7 @@ void main() {
   }
 
   vColor = aColor;
+  vOpacity = aOpacity;
 
   // Sample audio texture (1D data packed into 2D texture, so y=0.5)
   // uAudioData has the frequency data in the red channel (0.0 to 1.0)

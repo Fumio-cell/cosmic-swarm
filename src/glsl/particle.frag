@@ -1,4 +1,5 @@
 varying vec3 vColor;
+varying float vOpacity;
 varying float vAudioValue;
 uniform float uHueShift;
 uniform float uBrightness;
@@ -33,6 +34,7 @@ void main() {
   // A wide, massive, soft bell-curve that bleeds out to the edge for maximum overlap
   float fusionAlpha = exp(-dist * dist * 12.0);
   float alpha = mix(baseAlpha, fusionAlpha, uLiquidFusion);
+  alpha *= vOpacity;
   
   gl_FragColor = vec4(finalColor, alpha);
 }

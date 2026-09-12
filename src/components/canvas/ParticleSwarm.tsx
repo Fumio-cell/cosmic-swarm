@@ -16,6 +16,7 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
     const positions = new Float32Array(PARTICLE_COUNT * 3);
     const colors = new Float32Array(PARTICLE_COUNT * 3);
     const sizes = new Float32Array(PARTICLE_COUNT);
+    const opacities = new Float32Array(PARTICLE_COUNT);
     const audioIndices = new Float32Array(PARTICLE_COUNT);
 
     const baseColor = new THREE.Color('#00ff88'); // Neon green
@@ -79,10 +80,11 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
       colors[i * 3 + 2] = mixedColor.b;
 
       sizes[i] = Math.random() * 0.2 + 0.05;
+      opacities[i] = 0.5 + Math.random() * 0.5;
       audioIndices[i] = Math.random(); 
     }
 
-    return { positions, colors, sizes, audioIndices };
+    return { positions, colors, sizes, opacities, audioIndices };
   }, [shape]);
 
   const uniforms = useMemo(() => ({
@@ -145,6 +147,10 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
         <bufferAttribute
           attach="attributes-aSize"
           args={[particles.sizes, 1]}
+        />
+        <bufferAttribute
+          attach="attributes-aOpacity"
+          args={[particles.opacities, 1]}
         />
         <bufferAttribute
           attach="attributes-aAudioIndex"
