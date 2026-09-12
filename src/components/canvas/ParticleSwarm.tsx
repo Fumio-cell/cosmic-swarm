@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
@@ -9,8 +9,8 @@ import fragShader from '../../glsl/particle.frag?raw';
 const PARTICLE_COUNT = 30000;
 
 export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0, shape = 'galaxy' as ShapeType, zoom = 0.5, brightness = 1.0, density = 1.0, saturation = 1.0, flicker = 1.0, particleSize = 1.0, liquidFusion = false }) {
-  const shaderRef = useRef<THREE.ShaderMaterial>(null);
-  const pointsRef = useRef<THREE.Points>(null);
+  const shaderRefs = useRef<(THREE.ShaderMaterial | null)[]>([]);
+  const groupRef = useRef<THREE.Group>(null);
 
   const particles = useMemo(() => {
     const positions = new Float32Array(PARTICLE_COUNT * 3);
@@ -87,85 +87,100 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
     return { positions, colors, sizes, opacities, audioIndices };
   }, [shape]);
 
-  const uniforms = useMemo(() => ({
-    uTime: { value: 0 },
-    uAudioData: { value: audioAnalyzer.audioTexture },
-    uAudioReactiveness: { value: reactiveness },
-    uHueShift: { value: hueShift },
-    uChaos: { value: chaos },
-    uBrightness: { value: brightness },
-    uDensity: { value: density },
-    uSaturation: { value: saturation },
-    uFlicker: { value: flicker },
-    uParticleSize: { value: particleSize },
-    uLiquidFusion: { value: liquidFusion ? 1.0 : 0.0 },
-    uBass: { value: 0.0 },
-    uTreble: { value: 0.0 },
-  }), [reactiveness, hueShift, chaos, brightness, density, saturation, flicker, particleSize, liquidFusion]);
+  // BufferAttributeを一度だけ作り、複数のpointsで共有する（GPUバッファは1つだけ確保される）
+  const geometry = useMemo(() => {
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(particles.positions, 3));
+    geom.setAttribute('aColor', new THREE.BufferAttribute(particles.colors, 3));
+    geom.setAttribute('aSize', new THREE.BufferAttribute(particles.sizes, 1));
+    geom.setAttribute('aOpacity', new THREE.BufferAttribute(particles.opacities, 1));
+    geom.setAttribute('aAudioIndex', new THREE.BufferAttribute(particles.audioIndices, 1));
+    return geom;
+  }, [particles]);
+
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+    };
+  }, [geometry]);
+
+  // レイヤーを増やしたい場合はここに追加するだけでよい
+  const TRAIL_LAYERS = useMemo(() => [
+    { timeOffset: 0.0, trailOpacity: 1.0 },
+    { timeOffset: -0.06, trailOpacity: 0.3 },
+  ], []);
+
+  const uniformsList = useMemo(
+    () =>
+      TRAIL_LAYERS.map(() => ({
+        uTime: { value: 0 },
+        uAudioData: { value: audioAnalyzer.audioTexture },
+        uAudioReactiveness: { value: reactiveness },
+        uHueShift: { value: hueShift },
+        uChaos: { value: chaos },
+        uBrightness: { value: brightness },
+        uDensity: { value: density },
+        uSaturation: { value: saturation },
+        uFlicker: { value: flicker },
+        uParticleSize: { value: particleSize },
+        uLiquidFusion: { value: liquidFusion ? 1.0 : 0.0 },
+        uBass: { value: 0.0 },
+        uTreble: { value: 0.0 },
+        uTrailOpacity: { value: 1.0 },
+      })),
+    [reactiveness, hueShift, chaos, brightness, density, saturation, flicker, particleSize, liquidFusion, TRAIL_LAYERS]
+  );
 
   useFrame((state) => {
-    if (shaderRef.current) {
-      shaderRef.current.uniforms.uTime.value = state.clock.elapsedTime;
-      shaderRef.current.uniforms.uAudioReactiveness.value = reactiveness;
-      shaderRef.current.uniforms.uHueShift.value = hueShift;
-      shaderRef.current.uniforms.uChaos.value = chaos;
-      shaderRef.current.uniforms.uBrightness.value = brightness;
-      shaderRef.current.uniforms.uDensity.value = density;
-      shaderRef.current.uniforms.uSaturation.value = saturation;
-      shaderRef.current.uniforms.uFlicker.value = flicker;
-      shaderRef.current.uniforms.uParticleSize.value = particleSize;
-      shaderRef.current.uniforms.uLiquidFusion.value = liquidFusion ? 1.0 : 0.0;
-      shaderRef.current.uniforms.uBass.value = audioAnalyzer.bass;
-      shaderRef.current.uniforms.uTreble.value = audioAnalyzer.treble;
-      
-      // Update audio texture every frame if playing
-      if (audioAnalyzer.isPlaying()) {
-        audioAnalyzer.updateTexture();
-      }
+    const elapsed = state.clock.elapsedTime;
+
+    TRAIL_LAYERS.forEach((layer, i) => {
+      const mat = shaderRefs.current[i];
+      if (!mat) return;
+      // react-three-fiber clones the `uniforms` prop when it applies it, so the
+      // material does not share `uniformsList[i]`. Write to the material's own
+      // uniforms or every per-frame update is discarded.
+      const u = mat.uniforms;
+      u.uTime.value = elapsed + layer.timeOffset;
+      u.uAudioReactiveness.value = reactiveness;
+      u.uHueShift.value = hueShift;
+      u.uChaos.value = chaos;
+      u.uBrightness.value = brightness;
+      u.uDensity.value = density;
+      u.uSaturation.value = saturation;
+      u.uFlicker.value = flicker;
+      u.uParticleSize.value = particleSize;
+      u.uLiquidFusion.value = liquidFusion ? 1.0 : 0.0;
+      u.uBass.value = audioAnalyzer.bass;
+      u.uTreble.value = audioAnalyzer.treble;
+      u.uTrailOpacity.value = layer.trailOpacity;
+    });
+
+    if (audioAnalyzer.isPlaying()) {
+      audioAnalyzer.updateTexture();
     }
-    
-    // Smoothly scale the entire geometry based on the zoom slider
-    // This perfectly mimics a camera zoom without fighting OrbitControls
-    if (pointsRef.current) {
-      // Map zoom (0-1) to scale (0.15 to 5.0)
+
+    if (groupRef.current) {
       const targetScale = 0.15 + (zoom * 4.85);
-      pointsRef.current.scale.setScalar(THREE.MathUtils.lerp(pointsRef.current.scale.x, targetScale, 0.05));
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, 0.05));
     }
   });
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[particles.positions, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-aColor"
-          args={[particles.colors, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-aSize"
-          args={[particles.sizes, 1]}
-        />
-        <bufferAttribute
-          attach="attributes-aOpacity"
-          args={[particles.opacities, 1]}
-        />
-        <bufferAttribute
-          attach="attributes-aAudioIndex"
-          args={[particles.audioIndices, 1]}
-        />
-      </bufferGeometry>
-      <shaderMaterial
-        ref={shaderRef}
-        vertexShader={vertShader}
-        fragmentShader={fragShader}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+    <group ref={groupRef}>
+      {TRAIL_LAYERS.map((_, i) => (
+        <points key={i} geometry={geometry}>
+          <shaderMaterial
+            ref={(el) => { shaderRefs.current[i] = el; }}
+            vertexShader={vertShader}
+            fragmentShader={fragShader}
+            uniforms={uniformsList[i]}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </points>
+      ))}
+    </group>
   );
 }

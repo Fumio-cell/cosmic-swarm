@@ -6,6 +6,7 @@ uniform float uBrightness;
 uniform float uSaturation;
 uniform float uFlicker;
 uniform float uLiquidFusion;
+uniform float uTrailOpacity;
 varying float vDepth;
 
 vec3 shiftHue(vec3 color, float hue) {
@@ -35,6 +36,7 @@ void main() {
   float fusionAlpha = exp(-dist * dist * 12.0);
   float alpha = mix(baseAlpha, fusionAlpha, uLiquidFusion);
   alpha *= vOpacity;
+  alpha *= uTrailOpacity;
   
   gl_FragColor = vec4(finalColor, alpha);
 }
