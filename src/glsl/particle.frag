@@ -8,6 +8,8 @@ uniform float uFlicker;
 uniform float uLiquidFusion;
 uniform float uTrailOpacity;
 uniform float uFogDensity;
+uniform float uCoreMode;
+uniform float uCoreThreshold;
 varying float vDepth;
 varying float vCameraDist;
 
@@ -53,5 +55,10 @@ void main() {
   alpha *= vOpacity;
   alpha *= uTrailOpacity;
   
-  gl_FragColor = vec4(finalColor, alpha);
+  if (uCoreMode > 0.5) {
+    if (alpha < uCoreThreshold) discard;
+    gl_FragColor = vec4(finalColor, 1.0);
+  } else {
+    gl_FragColor = vec4(finalColor, alpha);
+  }
 }

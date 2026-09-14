@@ -105,14 +105,15 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
   }, [geometry]);
 
   // レイヤーを増やしたい場合はここに追加するだけでよい
-  const TRAIL_LAYERS = useMemo(() => [
-    { timeOffset: 0.0, trailOpacity: 1.0 },
-    { timeOffset: -0.06, trailOpacity: 0.3 },
+  const RENDER_LAYERS = useMemo(() => [
+    { kind: 'core', timeOffset: 0.0, trailOpacity: 1.0 },
+    { kind: 'glow', timeOffset: 0.0, trailOpacity: 1.0 },
+    { kind: 'glow', timeOffset: -0.06, trailOpacity: 0.3 },
   ], []);
 
   const uniformsList = useMemo(
     () =>
-      TRAIL_LAYERS.map(() => ({
+      RENDER_LAYERS.map((_, i) => ({
         uTime: { value: 0 },
         uAudioData: { value: audioAnalyzer.audioTexture },
         uAudioReactiveness: { value: reactiveness },
@@ -128,14 +129,16 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
         uTreble: { value: 0.0 },
         uTrailOpacity: { value: 1.0 },
         uFogDensity: { value: 0.02 },
+        uCoreMode: { value: RENDER_LAYERS[i]?.kind === 'core' ? 1.0 : 0.0 },
+        uCoreThreshold: { value: 0.4 },
       })),
-    [reactiveness, hueShift, chaos, brightness, density, saturation, flicker, particleSize, liquidFusion, TRAIL_LAYERS]
+    [reactiveness, hueShift, chaos, brightness, density, saturation, flicker, particleSize, liquidFusion, RENDER_LAYERS]
   );
 
   useFrame((state) => {
     const elapsed = state.clock.elapsedTime;
 
-    TRAIL_LAYERS.forEach((layer, i) => {
+    RENDER_LAYERS.forEach((layer, i) => {
       const mat = shaderRefs.current[i];
       if (!mat) return;
       // react-three-fiber clones the `uniforms` prop when it applies it, so the
@@ -169,16 +172,17 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
 
   return (
     <group ref={groupRef}>
-      {TRAIL_LAYERS.map((_, i) => (
+      {RENDER_LAYERS.map((layer, i) => (
         <points key={i} geometry={geometry}>
           <shaderMaterial
             ref={(el) => { shaderRefs.current[i] = el; }}
             vertexShader={vertShader}
             fragmentShader={fragShader}
             uniforms={uniformsList[i]}
-            transparent
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
+            transparent={layer.kind !== 'core'}
+            depthWrite={layer.kind === 'core'}
+            depthTest={true}
+            blending={layer.kind === 'core' ? THREE.NormalBlending : THREE.AdditiveBlending}
           />
         </points>
       ))}
