@@ -127,6 +127,7 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
         uBass: { value: 0.0 },
         uTreble: { value: 0.0 },
         uTrailOpacity: { value: 1.0 },
+        uFogDensity: { value: 0.02 },
       })),
     [reactiveness, hueShift, chaos, brightness, density, saturation, flicker, particleSize, liquidFusion, TRAIL_LAYERS]
   );

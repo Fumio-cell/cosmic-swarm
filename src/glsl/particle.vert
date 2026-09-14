@@ -18,6 +18,7 @@ varying vec3 vColor;
 varying float vOpacity;
 varying float vAudioValue;
 varying float vDepth;
+varying float vCameraDist;
 
 void main() {
   if (aAudioIndex > uDensity) {
@@ -74,6 +75,7 @@ void main() {
   pos += dir * dropletMask * uChaos * uBass * 15.0;
 
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+  vCameraDist = -mvPosition.z;
 
   // Exaggerate size perspective for stronger 3D feel
   float pSize = aSize * (50.0 / max(-mvPosition.z, 0.1)) * (1.0 + audioValue * 2.0 * uFlicker) * uParticleSize;
