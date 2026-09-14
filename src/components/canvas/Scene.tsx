@@ -55,6 +55,7 @@ export function Scene({ reactiveness, zoom, hueShift, rotationSpeed, chaos, shap
             hueShift={hueShift} chaos={chaos} shape={shape}
             brightness={brightness} density={density} saturation={saturation}
             flicker={flicker} particleSize={particleSize}
+            liquidFusion={liquidFusion}
           />
         )}
 
