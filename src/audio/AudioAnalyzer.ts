@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { prepareAudioUrl } from '../lib/audio/aiffToWavBlob';
 
 export class AudioAnalyzer {
   private ctx: AudioContext | null = null;
@@ -52,17 +53,17 @@ export class AudioAnalyzer {
     if (this.ctx?.state === 'suspended') {
       await this.ctx.resume();
     }
-    const url = URL.createObjectURL(file);
+    const url = await prepareAudioUrl(file);
     this.audio.src = url;
     // Removed automatic playback so user can start manually
   }
 
-  public togglePlay() {
+  public togglePlay(): Promise<void> {
     if (this.audio.paused) {
-      this.audio.play();
-    } else {
-      this.audio.pause();
+      return this.audio.play();
     }
+    this.audio.pause();
+    return Promise.resolve();
   }
 
   public updateTexture() {

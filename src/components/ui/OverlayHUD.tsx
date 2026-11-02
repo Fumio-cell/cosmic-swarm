@@ -5,6 +5,12 @@ import { DEMO_MODE, DEMO_MAX_SECONDS } from '../../config';
 import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle } from 'lucide-react';
 import type { ShapeType } from '../../App';
 
+// Browsers don't always report a MIME type for AIFF, so fall back to the extension.
+const isAudioFile = (file: File) => {
+  const name = file.name.toLowerCase();
+  return file.type.startsWith('audio/') || name.endsWith('.aif') || name.endsWith('.aiff') || name.endsWith('.aifc');
+};
+
 interface OverlayHUDProps {
   reactiveness: number;
   setReactiveness: (val: number) => void;
@@ -79,6 +85,23 @@ export function OverlayHUD({
     return () => audioAnalyzer.audio.removeEventListener('ended', handleEnded);
   }, [isRecording]);
 
+  // A failed load returns the player to its no-track state.
+  const handleLoadFailure = useCallback((e: unknown) => {
+    alert(`Failed to decode audio file (${e instanceof Error ? e.message : String(e)})`);
+    audioAnalyzer.audio.pause();
+    setFileName(null);
+    setIsPlaying(false);
+  }, []);
+
+  useEffect(() => {
+    const handleError = () => {
+      const error = audioAnalyzer.audio.error;
+      handleLoadFailure(new Error(error?.message || `MediaError code ${error?.code}`));
+    };
+    audioAnalyzer.audio.addEventListener('error', handleError);
+    return () => audioAnalyzer.audio.removeEventListener('error', handleError);
+  }, [handleLoadFailure]);
+
   const handleImageFile = useCallback((file: File) => {
     setImageFile(file);
   }, [setImageFile]);
@@ -87,21 +110,31 @@ export function OverlayHUD({
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (!file) return;
-    if (file.type.startsWith('audio/')) {
+    if (isAudioFile(file)) {
       setFileName(file.name);
-      await audioAnalyzer.loadAudio(file);
+      try {
+        await audioAnalyzer.loadAudio(file);
+      } catch (err) {
+        handleLoadFailure(err);
+        return;
+      }
       setIsPlaying(false);
     } else if (file.type.startsWith('image/')) {
       await handleImageFile(file);
     }
-  }, [handleImageFile]);
+  }, [handleImageFile, handleLoadFailure]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.type.startsWith('audio/')) {
+    if (isAudioFile(file)) {
       setFileName(file.name);
-      await audioAnalyzer.loadAudio(file);
+      try {
+        await audioAnalyzer.loadAudio(file);
+      } catch (err) {
+        handleLoadFailure(err);
+        return;
+      }
       setIsPlaying(false);
     } else if (file.type.startsWith('image/')) {
       await handleImageFile(file);
@@ -114,7 +147,7 @@ export function OverlayHUD({
 
   const togglePlay = () => {
     if (isRecording) return; // Prevent pausing during render
-    audioAnalyzer.togglePlay();
+    audioAnalyzer.togglePlay().catch(() => setIsPlaying(false));
     setIsPlaying(audioAnalyzer.isPlaying());
   };
 
@@ -165,14 +198,14 @@ export function OverlayHUD({
         >
           <input
             type="file"
-            accept="audio/*,image/*"
+            accept="audio/*,image/*,audio/aiff,audio/x-aiff,.aif,.aiff,.aifc"
             ref={fileInputRef}
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
           <Upload size={32} />
           <p>DRAG & DROP OR CLICK TO BROWSE</p>
-          <span className="sub-text">MP3, WAV, FLAC / IMAGE</span>
+          <span className="sub-text">MP3, WAV, AIFF, FLAC / IMAGE</span>
         </div>
 
         {fileName && (
