@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { videoRecorder } from '../../utils/VideoRecorder';
 import { DEMO_MODE, DEMO_MAX_SECONDS } from '../../config';
-import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle } from 'lucide-react';
+import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle, Music } from 'lucide-react';
 import type { ShapeType } from '../../App';
 
 // Browsers don't always report a MIME type for AIFF, so fall back to the extension.
@@ -71,6 +71,7 @@ export function OverlayHUD({
   const [isRecording, setIsRecording] = useState(false);
   const [demoLimitReached, setDemoLimitReached] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [sampleLoading, setSampleLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -102,42 +103,61 @@ export function OverlayHUD({
     return () => audioAnalyzer.audio.removeEventListener('error', handleError);
   }, [handleLoadFailure]);
 
-  const handleImageFile = useCallback((file: File) => {
-    setImageFile(file);
-  }, [setImageFile]);
+  // Every way in (drop, file chooser, sample) goes through here.
+  // Resolves true when an audio track was loaded.
+  const loadFile = useCallback(async (file: File): Promise<boolean> => {
+    if (isAudioFile(file)) {
+      setFileName(file.name);
+      try {
+        await audioAnalyzer.loadAudio(file);
+      } catch (err) {
+        handleLoadFailure(err);
+        return false;
+      }
+      setIsPlaying(false);
+      return true;
+    }
+    if (file.type.startsWith('image/')) {
+      setImageFile(file);
+    }
+    return false;
+  }, [setImageFile, handleLoadFailure]);
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (!file) return;
-    if (isAudioFile(file)) {
-      setFileName(file.name);
-      try {
-        await audioAnalyzer.loadAudio(file);
-      } catch (err) {
-        handleLoadFailure(err);
-        return;
-      }
-      setIsPlaying(false);
-    } else if (file.type.startsWith('image/')) {
-      await handleImageFile(file);
-    }
-  }, [handleImageFile, handleLoadFailure]);
+    await loadFile(file);
+  }, [loadFile]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (isAudioFile(file)) {
-      setFileName(file.name);
+    await loadFile(file);
+  };
+
+  // Fetch the bundled excerpt, load it like a dropped file, then start playing.
+  const loadSample = async () => {
+    setSampleLoading(true);
+    try {
+      let blob: Blob;
       try {
-        await audioAnalyzer.loadAudio(file);
-      } catch (err) {
-        handleLoadFailure(err);
+        const res = await fetch(`${import.meta.env.BASE_URL}samples/keeper-excerpt.mp3`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        blob = await res.blob();
+      } catch {
+        alert('Could not load the sample. Please check your connection and try again.');
         return;
       }
-      setIsPlaying(false);
-    } else if (file.type.startsWith('image/')) {
-      await handleImageFile(file);
+      if (!(await loadFile(new File([blob], 'Keeper (sample).mp3', { type: 'audio/mpeg' })))) return;
+      try {
+        await audioAnalyzer.audio.play();
+        setIsPlaying(true);
+      } catch {
+        setIsPlaying(false);
+      }
+    } finally {
+      setSampleLoading(false);
     }
   };
 
@@ -217,6 +237,11 @@ export function OverlayHUD({
           <p>DRAG & DROP OR CLICK TO BROWSE</p>
           <span className="sub-text">MP3, WAV, AIFF, FLAC / IMAGE</span>
         </div>
+
+        <button type="button" className="sample-btn" onClick={loadSample} disabled={sampleLoading}>
+          <Music size={16} />
+          {sampleLoading ? 'LOADING...' : 'TRY A SAMPLE'}
+        </button>
 
         {fileName && (
           <div className="player-panel">
