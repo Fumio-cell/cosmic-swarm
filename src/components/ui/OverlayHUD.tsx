@@ -193,7 +193,15 @@ export function OverlayHUD({
       <div className="hud-controls">
         <div
           className="dropzone"
+          role="button"
+          tabIndex={0}
           onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
           style={{ cursor: 'pointer' }}
         >
           <input
@@ -201,6 +209,8 @@ export function OverlayHUD({
             accept="audio/*,image/*,audio/aiff,audio/x-aiff,.aif,.aiff,.aifc"
             ref={fileInputRef}
             onChange={handleFileSelect}
+            aria-hidden="true"
+            tabIndex={-1}
             style={{ display: 'none' }}
           />
           <Upload size={32} />
@@ -237,7 +247,13 @@ export function OverlayHUD({
               </div>
             )}
 
-            <button className="play-btn" onClick={togglePlay} disabled={isRecording}>
+            <button
+              className="play-btn"
+              onClick={togglePlay}
+              disabled={isRecording}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+              title={isPlaying ? 'Pause' : 'Play'}
+            >
               {isPlaying ? <Pause size={24} /> : <Play size={24} />}
             </button>
           </div>
@@ -259,6 +275,7 @@ export function OverlayHUD({
                 <button
                   className="shape-btn"
                   title="CLEAR IMAGE (RETURN TO SWARM)"
+                  aria-label="Clear image and return to swarm"
                   onClick={() => setImageFile(null)}
                   style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px' }}
                 >
@@ -267,8 +284,8 @@ export function OverlayHUD({
               </label>
 
               <div className="slider-group">
-                <label>VOXEL RESOLUTION</label>
-                <input
+                <label htmlFor="voxel-resolution">VOXEL RESOLUTION</label>
+                <input id="voxel-resolution"
                   type="range"
                   min="8" max="160" step="1"
                   value={voxelResolution}
@@ -277,8 +294,8 @@ export function OverlayHUD({
                 <span className="slider-value">{voxelResolution}px</span>
               </div>
               <div className="slider-group">
-                <label>VOXEL SPACING</label>
-                <input
+                <label htmlFor="voxel-spacing">VOXEL SPACING</label>
+                <input id="voxel-spacing"
                   type="range"
                   min="0.5" max="4" step="0.1"
                   value={voxelSpacing}
@@ -287,8 +304,8 @@ export function OverlayHUD({
                 <span className="slider-value">{voxelSpacing.toFixed(1)}</span>
               </div>
               <div className="slider-group">
-                <label>WIND STRENGTH</label>
-                <input
+                <label htmlFor="wind-strength">WIND STRENGTH</label>
+                <input id="wind-strength"
                   type="range"
                   min="0" max="2" step="0.01"
                   value={windStrength}
@@ -297,8 +314,8 @@ export function OverlayHUD({
                 <span className="slider-value">{(windStrength * 100).toFixed(0)}%</span>
               </div>
               <div className="slider-group">
-                <label>GATHER (SWARM ⇄ IMAGE)</label>
-                <input
+                <label htmlFor="gather-strength">GATHER (SWARM ⇄ IMAGE)</label>
+                <input id="gather-strength"
                   type="range"
                   min="0" max="1" step="0.01"
                   value={gatherStrength}
@@ -324,11 +341,11 @@ export function OverlayHUD({
                 };
                 const getTitle = () => {
                   switch(s) {
-                    case 'none':   return 'なし';
-                    case 'galaxy': return 'ユニバース';
-                    case 'sphere': return '球体';
-                    case 'torus':  return 'ドーナツ';
-                    case 'amoeba': return '水的';
+                    case 'none':   return 'None';
+                    case 'galaxy': return 'Galaxy';
+                    case 'sphere': return 'Sphere';
+                    case 'torus':  return 'Torus';
+                    case 'amoeba': return 'Droplets';
                   }
                 };
                 return (
@@ -337,6 +354,8 @@ export function OverlayHUD({
                     className={`shape-btn ${shape === s ? 'active' : ''}`}
                     onClick={() => setShape(s)}
                     title={getTitle()}
+                    aria-label={getTitle()}
+                    aria-pressed={shape === s}
                   >
                     {getIcon()}
                   </button>
@@ -346,15 +365,23 @@ export function OverlayHUD({
           </div>
 
           <div className="slider-group" style={{ padding: '0.8rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', margin: 0 }} onClick={() => setLiquidFusion(!liquidFusion)}>
-              <span>LIQUID FUSION (METABALL)</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={liquidFusion}
+              aria-labelledby="liquid-fusion-label"
+              className="switch-row"
+              style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', margin: 0 }}
+              onClick={() => setLiquidFusion(!liquidFusion)}
+            >
+              <span id="liquid-fusion-label">LIQUID FUSION (METABALL)</span>
               <span style={{ color: liquidFusion ? 'var(--neon-green)' : '#666', fontWeight: 'bold' }}>{liquidFusion ? 'ON' : 'OFF'}</span>
-            </label>
+            </button>
           </div>
 
           <div className="slider-group">
-            <label>REACTIVENESS</label>
-            <input 
+            <label htmlFor="param-reactiveness">REACTIVENESS</label>
+            <input id="param-reactiveness" 
               type="range" 
               min="0" max="3" step="0.1" 
               value={reactiveness}
@@ -363,8 +390,8 @@ export function OverlayHUD({
             <span className="slider-value">{reactiveness.toFixed(1)}</span>
           </div>
           <div className="slider-group">
-            <label>SMOOTH ZOOM</label>
-            <input 
+            <label htmlFor="param-zoom">SMOOTH ZOOM</label>
+            <input id="param-zoom" 
               type="range" 
               min="0" max="1" step="0.01" 
               value={zoom}
@@ -373,8 +400,8 @@ export function OverlayHUD({
             <span className="slider-value">{(zoom * 100).toFixed(0)}%</span>
           </div>
           <div className="slider-group">
-            <label>COLOR SHIFT</label>
-            <input 
+            <label htmlFor="param-hue-shift">COLOR SHIFT</label>
+            <input id="param-hue-shift" 
               type="range" 
               min="0" max="1" step="0.01" 
               value={hueShift}
@@ -383,8 +410,8 @@ export function OverlayHUD({
             <span className="slider-value">{Math.round(hueShift * 360)}°</span>
           </div>
           <div className="slider-group">
-            <label>COLOR SATURATION (WHITE LIGHT)</label>
-            <input 
+            <label htmlFor="param-saturation">COLOR SATURATION (WHITE LIGHT)</label>
+            <input id="param-saturation" 
               type="range" 
               min="0" max="1" step="0.01" 
               value={saturation}
@@ -393,8 +420,8 @@ export function OverlayHUD({
             <span className="slider-value">{(saturation * 100).toFixed(0)}%</span>
           </div>
           <div className="slider-group">
-            <label>LIGHT FLICKER (TWINKLE)</label>
-            <input 
+            <label htmlFor="param-flicker">LIGHT FLICKER (TWINKLE)</label>
+            <input id="param-flicker" 
               type="range" 
               min="0" max="1" step="0.01" 
               value={flicker}
@@ -403,8 +430,8 @@ export function OverlayHUD({
             <span className="slider-value">{(flicker * 100).toFixed(0)}%</span>
           </div>
           <div className="slider-group">
-            <label>PARTICLE SIZE</label>
-            <input 
+            <label htmlFor="param-particle-size">PARTICLE SIZE</label>
+            <input id="param-particle-size" 
               type="range" 
               min="0.1" max="10.0" step="0.1"
               value={particleSize}
@@ -413,8 +440,8 @@ export function OverlayHUD({
             <span className="slider-value">{particleSize.toFixed(1)}x</span>
           </div>
           <div className="slider-group">
-            <label>ROTATION SPEED</label>
-            <input 
+            <label htmlFor="param-rotation-speed">ROTATION SPEED</label>
+            <input id="param-rotation-speed" 
               type="range" 
               min="-5" max="5" step="0.1" 
               value={rotationSpeed}
@@ -423,8 +450,8 @@ export function OverlayHUD({
             <span className="slider-value">{rotationSpeed > 0 ? '+' : ''}{rotationSpeed.toFixed(1)}x</span>
           </div>
           <div className="slider-group">
-            <label>CHAOS / TURBULENCE</label>
-            <input 
+            <label htmlFor="param-chaos">CHAOS / TURBULENCE</label>
+            <input id="param-chaos" 
               type="range" 
               min="0" max="1" step="0.01" 
               value={chaos}
@@ -433,8 +460,8 @@ export function OverlayHUD({
             <span className="slider-value">{(chaos * 100).toFixed(0)}%</span>
           </div>
           <div className="slider-group">
-            <label>BRIGHTNESS</label>
-            <input 
+            <label htmlFor="param-brightness">BRIGHTNESS</label>
+            <input id="param-brightness" 
               type="range" 
               min="0.1" max="20.0" step="0.1" 
               value={brightness}
@@ -443,8 +470,8 @@ export function OverlayHUD({
             <span className="slider-value">{brightness.toFixed(1)}x</span>
           </div>
           <div className="slider-group">
-            <label>PARTICLE DENSITY</label>
-            <input 
+            <label htmlFor="param-density">PARTICLE DENSITY</label>
+            <input id="param-density" 
               type="range" 
               min="0.01" max="1.0" step="0.01" 
               value={density}

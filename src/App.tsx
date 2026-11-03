@@ -45,7 +45,7 @@ function App() {
   return (
     <div className="toolkit-wrapper" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
       <Header />
-      <div className="app-container" style={{ flex: 1, position: 'relative' }}>
+      <main className="app-container" style={{ flex: 1, position: 'relative' }}>
         <Scene 
         reactiveness={reactiveness} zoom={zoom} hueShift={hueShift} 
         rotationSpeed={rotationSpeed} chaos={chaos} shape={shape} 
@@ -73,7 +73,7 @@ function App() {
         windStrength={windStrength} setWindStrength={setWindStrength}
         gatherStrength={gatherStrength} setGatherStrength={setGatherStrength}
       />
-      </div>
+      </main>
     </div>
   );
 }

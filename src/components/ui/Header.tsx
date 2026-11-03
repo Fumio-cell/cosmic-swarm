@@ -1,10 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Info, X } from 'lucide-react';
 import { DEMO_MODE } from '../../config';
 
 export const Header: React.FC = () => {
     const [showInfo, setShowInfo] = useState(false);
+    const infoButtonRef = useRef<HTMLButtonElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+    // While the About dialog is open: focus its close button, close on Escape,
+    // and hand focus back to the info button afterwards.
+    useEffect(() => {
+        if (!showInfo) return;
+        closeButtonRef.current?.focus();
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setShowInfo(false);
+        };
+        document.addEventListener('keydown', onKeyDown);
+        const infoButton = infoButtonRef.current;
+        return () => {
+            document.removeEventListener('keydown', onKeyDown);
+            infoButton?.focus();
+        };
+    }, [showInfo]);
 
     return (
         <header className="toolkit-header">
@@ -20,7 +38,7 @@ export const Header: React.FC = () => {
                 </div>
                 <div className="app-separator">/</div>
                 <div className="app-name">Cosmic Swarm</div>
-                <button onClick={() => setShowInfo(true)} className="info-btn">
+                <button ref={infoButtonRef} onClick={() => setShowInfo(true)} className="info-btn" aria-label="About Cosmic Swarm">
                     <Info className="w-4 h-4" />
                 </button>
             </div>
@@ -108,7 +126,7 @@ export const Header: React.FC = () => {
                     text-align: left;
                 }
                 .info-modal h2 { margin-top: 0; color: #f8fafc; font-size: 1.5rem; }
-                .info-modal h3 { color: #7c5cfc; font-size: 0.85rem; margin-bottom: 24px; font-weight: 600; }
+                .info-modal h3 { color: #9378ff; font-size: 0.85rem; margin-bottom: 24px; font-weight: 600; }
                 .info-modal p { color: #cbd5e1; line-height: 1.6; font-size: 0.9rem; margin-bottom: 12px; }
                 .info-modal ul { color: #cbd5e1; font-size: 0.85rem; padding-left: 20px; list-style-type: none; margin:0; padding:0; }
                 .info-modal li { margin-bottom: 8px; font-weight: 500; color: #94a3b8; }
@@ -129,9 +147,9 @@ export const Header: React.FC = () => {
         
             {showInfo && createPortal(
                 <div className="info-modal-overlay" onClick={() => setShowInfo(false)}>
-                    <div className="info-modal" onClick={e => e.stopPropagation()}>
-                        <button className="info-close" onClick={() => setShowInfo(false)}><X className="w-5 h-5"/></button>
-                        <h2>Cosmic Swarm</h2>
+                    <div className="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" onClick={e => e.stopPropagation()}>
+                        <button ref={closeButtonRef} className="info-close" aria-label="Close" onClick={() => setShowInfo(false)}><X className="w-5 h-5"/></button>
+                        <h2 id="info-modal-title">Cosmic Swarm</h2>
                         <h3>Macroscopic & Microscopic Audio-Reactive Entity Engine | 宇宙・微視世界を表現する有機流体エンジン</h3>
                         
                         <div style={{ marginBottom: '24px' }}>

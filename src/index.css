@@ -394,3 +394,27 @@ h1 {
   background: var(--neon-green);
   box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
 }
+
+/* LIQUID FUSION switch: a real button, drawn like the slider labels it replaced. */
+.switch-row {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: #aaa;
+}
+
+/* Keyboard focus only; mouse clicks don't show it. */
+button:focus-visible,
+input:focus-visible,
+.dropzone:focus-visible,
+[role="switch"]:focus-visible {
+  outline: 2px solid var(--neon-green);
+  outline-offset: 2px;
+}
