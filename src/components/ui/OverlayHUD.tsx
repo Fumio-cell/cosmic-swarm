@@ -2,8 +2,9 @@ import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { videoRecorder } from '../../utils/VideoRecorder';
 import { DEMO_MODE, DEMO_MAX_SECONDS, BUY_URL } from '../../config';
-import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle, Music } from 'lucide-react';
+import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle, Music, Shuffle } from 'lucide-react';
 import type { ShapeType } from '../../App';
+import { LOOKS, type Look } from '../../looks';
 
 // Browsers don't always report a MIME type for AIFF, so fall back to the extension.
 const isAudioFile = (file: File) => {
@@ -46,6 +47,9 @@ interface OverlayHUDProps {
   setWindStrength: (val: number) => void;
   gatherStrength: number;
   setGatherStrength: (val: number) => void;
+  selectedLookId: string | null;
+  onApplyLook: (look: Look) => void;
+  onRandomLook: () => void;
 }
 
 export function OverlayHUD({ 
@@ -65,7 +69,8 @@ export function OverlayHUD({
   voxelResolution, setVoxelResolution,
   voxelSpacing, setVoxelSpacing,
   windStrength, setWindStrength,
-  gatherStrength, setGatherStrength
+  gatherStrength, setGatherStrength,
+  selectedLookId, onApplyLook, onRandomLook
 }: OverlayHUDProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -381,6 +386,31 @@ export function OverlayHUD({
                 />
                 <span className="slider-value">{(gatherStrength * 100).toFixed(0)}%</span>
               </div>
+            </div>
+          )}
+
+          {!imageFile && (
+            <div className="looks" role="group" aria-labelledby="looks-label">
+              <span id="looks-label" className="looks-label">LOOKS</span>
+              <div className="looks-grid">
+                {LOOKS.map((look) => (
+                  <button
+                    key={look.id}
+                    type="button"
+                    className={`look-btn ${selectedLookId === look.id ? 'active' : ''}`}
+                    aria-pressed={selectedLookId === look.id}
+                    title={look.tagline}
+                    onClick={() => onApplyLook(look)}
+                  >
+                    <img src={`${import.meta.env.BASE_URL}looks/${look.id}.webp`} alt="" width={320} height={180} />
+                    <span>{look.name}</span>
+                  </button>
+                ))}
+              </div>
+              <button type="button" className="random-btn" onClick={onRandomLook}>
+                <Shuffle size={14} />
+                RANDOM
+              </button>
             </div>
           )}
 

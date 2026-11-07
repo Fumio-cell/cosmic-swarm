@@ -305,7 +305,9 @@ h1 {
 }
 
 .render-btn.recording {
-  background: #ff3366;
+  /* Same hue as #ff3366 (345°), darker so white text reaches 4.97:1. */
+  background: #e00038;
+  border-color: #e00038;
   color: white;
   animation: rec-pulse 1.5s infinite;
   pointer-events: none;
@@ -461,6 +463,90 @@ h1 {
   font-size: 0.8rem;
   color: var(--cyan);
   align-self: flex-end;
+}
+
+/* Looks: preset buttons at the top of the parameter panel */
+.looks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.looks-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.looks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.look-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: 0.3rem 0.3rem 0.4rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #ccc;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.look-btn img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  background: #050505;
+}
+
+.look-btn span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.look-btn:hover {
+  border-color: rgba(0, 255, 136, 0.6);
+  color: #fff;
+}
+
+.look-btn.active {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.random-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.4rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--neon-green);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.random-btn:hover {
+  background: rgba(0, 255, 136, 0.1);
 }
 
 /* Shape Buttons */

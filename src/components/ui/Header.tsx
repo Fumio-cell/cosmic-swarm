@@ -153,7 +153,6 @@ export const Header: React.FC = () => {
                         <h3>Macroscopic & Microscopic Audio-Reactive Entity Engine</h3>
                         
                         <div style={{ marginBottom: '24px' }}>
-                            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', marginBottom: '8px' }}>EN</div>
                             <p>Cosmic Swarm is a highly reactive WebGL visualization engine that simulates living organic matter, scaling from cellular division to stellar nebulae. Driven by audio frequency separation, bass kicks induce massive liquid expansion and droplet detachment, while high-frequency treble triggers micro-ripples across the entity's surface. Enhanced with structural color iridescence and metaball physics, it generates poetic, mesmerizing visual signals synchronized perfectly with sound.</p>
                             <ul><li>Key Features: Audio Frequency Separation, Metaball Liquid Fusion, Iridescent Structural Color, Real-time Droplet Physics.</li></ul>
                         </div>
