@@ -1,4 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;500;700&display=swap');
+/* Self-hosted fonts (latin subset, only the weights in use). font-display: swap is set in each file. */
+@import '@fontsource/fraunces/latin-400.css';
+@import '@fontsource/fraunces/latin-500.css';
+@import '@fontsource/space-mono/latin-400.css';
+@import '@fontsource/space-mono/latin-700.css';
+@import '@fontsource/space-mono/latin-400-italic.css';
+@import '@fontsource/inter/latin-300.css';
+@import '@fontsource/inter/latin-500.css';
+@import '@fontsource/inter/latin-700.css';
 
 :root {
   --neon-green: #00ff88;
@@ -102,6 +110,36 @@ h1 {
   backdrop-filter: blur(10px);
   color: var(--neon-green);
   border-radius: 4px;
+}
+
+/* Concept line on the first screen. Kept to the centre column so it clears
+   the parameter panel (300px + 2rem on the right) and the left column. */
+.concept {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(36rem, calc(100% - 2 * (300px + 3rem)));
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.concept-text {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #a6a6a6;
+}
+
+.concept-note {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #8f8f8f;
 }
 
 .hud-controls {

@@ -150,7 +150,7 @@ export const Header: React.FC = () => {
                     <div className="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" onClick={e => e.stopPropagation()}>
                         <button ref={closeButtonRef} className="info-close" aria-label="Close" onClick={() => setShowInfo(false)}><X className="w-5 h-5"/></button>
                         <h2 id="info-modal-title">Cosmic Swarm</h2>
-                        <h3>Macroscopic & Microscopic Audio-Reactive Entity Engine | 宇宙・微視世界を表現する有機流体エンジン</h3>
+                        <h3>Macroscopic & Microscopic Audio-Reactive Entity Engine</h3>
                         
                         <div style={{ marginBottom: '24px' }}>
                             <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', marginBottom: '8px' }}>EN</div>
@@ -158,11 +158,7 @@ export const Header: React.FC = () => {
                             <ul><li>Key Features: Audio Frequency Separation, Metaball Liquid Fusion, Iridescent Structural Color, Real-time Droplet Physics.</li></ul>
                         </div>
 
-                        <div>
-                            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', marginBottom: '8px' }}>JP</div>
-                            <p>Cosmic Swarmは、細胞分裂から宇宙の星雲に至るまで、生命体のような有機的物質の振る舞いをシミュレートするWebGLビジュアライザ・エンジンです。音域分離技術により、低音（キック）に合わせて流体が大きく膨張・分離し、高音（ハイハット）に呼応して表面に細かな波紋が走ります。メタボールの物理演算と構造色（イリデッセンス）を組み合わせることで、音と完全に同期した詩的で幻惑的なビジュアルシグナルを生成します。</p>
-                            <ul><li>主要機能: 周波数帯域ごとのオーディオ・リアクション、流体結合（メタボール）、構造色グラデーション、液滴分離物理。</li></ul>
-                        </div>
+                        <p>Sample track: “Keeper” by Bomb Sun.</p>
                     </div>
                 </div>,
                 document.body

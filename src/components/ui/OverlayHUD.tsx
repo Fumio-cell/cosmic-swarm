@@ -222,6 +222,14 @@ export function OverlayHUD({
 
   return (
     <div className="overlay-hud" onDrop={handleDrop} onDragOver={handleDragOver}>
+      {/* Concept line: only on the first screen, before any file is loaded */}
+      {!fileName && !imageFile && (
+        <div className="concept">
+          <p className="concept-text">A 3D swarm of light that moves to your music. Render it to video in your browser.</p>
+          <p className="concept-note">No subscription. No upload.</p>
+        </div>
+      )}
+
       {/* Main Dropzone / Controls */}
       <div className="hud-controls">
         <div
