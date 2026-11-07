@@ -50,9 +50,9 @@ export const LOOKS: readonly Look[] = [
     name: 'Bioluminescence',
     tagline: 'Deep-sea light that flickers with the highs.',
     settings: {
-      shape: 'amoeba', liquidFusion: false, reactiveness: 1.2, zoom: 0.15,
-      hueShift: 0.03, saturation: 1.0, flicker: 1.0, particleSize: 2.5,
-      rotationSpeed: -0.4, chaos: 0.5, brightness: 2.5, density: 0.3,
+      shape: 'amoeba', liquidFusion: false, reactiveness: 1.2, zoom: 0.2,
+      hueShift: 0.03, saturation: 1.0, flicker: 1.0, particleSize: 4.0,
+      rotationSpeed: -0.4, chaos: 0.5, brightness: 5.0, density: 0.3,
     },
   },
   {
@@ -61,8 +61,8 @@ export const LOOKS: readonly Look[] = [
     tagline: 'A flock turning as one.',
     settings: {
       shape: 'galaxy', liquidFusion: false, reactiveness: 1.5, zoom: 0.4,
-      hueShift: 0.65, saturation: 0.45, flicker: 0.5, particleSize: 0.8,
-      rotationSpeed: 4.0, chaos: 0.5, brightness: 2.0, density: 1.0,
+      hueShift: 0.65, saturation: 0.8, flicker: 0.5, particleSize: 0.8,
+      rotationSpeed: 4.0, chaos: 0.5, brightness: 3.0, density: 1.0,
     },
   },
   {
@@ -81,8 +81,8 @@ export const LOOKS: readonly Look[] = [
     tagline: 'Slow matter before the first breath.',
     settings: {
       shape: 'sphere', liquidFusion: true, reactiveness: 0.4, zoom: 0.2,
-      hueShift: 0.64, saturation: 0.8, flicker: 0.2, particleSize: 3.0,
-      rotationSpeed: 0.2, chaos: 0.85, brightness: 1.0, density: 0.5,
+      hueShift: 0.72, saturation: 0.9, flicker: 0.2, particleSize: 3.0,
+      rotationSpeed: 0.2, chaos: 0.7, brightness: 0.7, density: 0.5,
     },
   },
 ];
