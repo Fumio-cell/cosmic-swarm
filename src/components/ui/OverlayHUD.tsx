@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { videoRecorder } from '../../utils/VideoRecorder';
-import { DEMO_MODE, DEMO_MAX_SECONDS } from '../../config';
+import { DEMO_MODE, DEMO_MAX_SECONDS, BUY_URL } from '../../config';
 import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle, Music } from 'lucide-react';
 import type { ShapeType } from '../../App';
 
@@ -69,7 +69,7 @@ export function OverlayHUD({
 }: OverlayHUDProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [demoLimitReached, setDemoLimitReached] = useState(false);
+  const [exportDone, setExportDone] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -107,6 +107,7 @@ export function OverlayHUD({
   // Resolves true when an audio track was loaded.
   const loadFile = useCallback(async (file: File): Promise<boolean> => {
     if (isAudioFile(file)) {
+      setExportDone(false);
       setFileName(file.name);
       try {
         await audioAnalyzer.loadAudio(file);
@@ -177,6 +178,12 @@ export function OverlayHUD({
     audioAnalyzer.audio.currentTime = 0;
     setIsRecording(false);
     setIsPlaying(false);
+    setExportDone(false);
+  };
+
+  // Called right after the recorder starts the download.
+  const handleExportComplete = () => {
+    setExportDone(true);
   };
 
   const startRender = async () => {
@@ -188,7 +195,7 @@ export function OverlayHUD({
     await audioAnalyzer.audio.play();
     setIsPlaying(true);
     setIsRecording(true);
-    setDemoLimitReached(false);
+    setExportDone(false);
 
     if (DEMO_MODE) {
       videoRecorder.startRecording(
@@ -199,11 +206,17 @@ export function OverlayHUD({
           audioAnalyzer.audio.pause();
           setIsRecording(false);
           setIsPlaying(false);
-          setDemoLimitReached(true);
-        }
+        },
+        handleExportComplete
       );
     } else {
-      videoRecorder.startRecording(canvas, audioAnalyzer.getAudioStream());
+      videoRecorder.startRecording(
+        canvas,
+        audioAnalyzer.getAudioStream(),
+        undefined,
+        undefined,
+        handleExportComplete
+      );
     }
   };
 
@@ -238,24 +251,35 @@ export function OverlayHUD({
           <span className="sub-text">MP3, WAV, AIFF, FLAC / IMAGE</span>
         </div>
 
-        <button type="button" className="sample-btn" onClick={loadSample} disabled={sampleLoading}>
+        <button type="button" className="sample-btn" onClick={loadSample} disabled={sampleLoading || isRecording}>
           <Music size={16} />
           {sampleLoading ? 'LOADING...' : 'TRY A SAMPLE'}
         </button>
 
         {fileName && (
           <div className="player-panel">
-            <div className="track-info">
-              <span className="track-name">{fileName}</span>
+            <div className="track-row">
+              <span className="track-name" title={fileName}>{fileName}</span>
+              <button
+                className="play-btn"
+                onClick={togglePlay}
+                disabled={isRecording}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+                title={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+              </button>
             </div>
 
             <button className={`render-btn ${isRecording ? 'recording' : ''}`} onClick={startRender} disabled={isRecording}>
-              <Video size={20} />
-              {isRecording
-                ? 'RECORDING...'
-                : DEMO_MODE
-                  ? `RENDER VIDEO (${DEMO_MAX_SECONDS}S PREVIEW)`
-                  : 'RENDER VIDEO'}
+              <Video size={18} />
+              <span>
+                {isRecording
+                  ? 'RECORDING...'
+                  : DEMO_MODE
+                    ? <>RENDER VIDEO <span className="nowrap">({DEMO_MAX_SECONDS}S PREVIEW)</span></>
+                    : 'RENDER VIDEO'}
+              </span>
             </button>
 
             {isRecording && (
@@ -265,22 +289,23 @@ export function OverlayHUD({
               </button>
             )}
 
-            {demoLimitReached && (
-              <div className="demo-limit-notice">
-                {DEMO_MAX_SECONDS}s preview limit reached. Full-length export is
-                available in the full version — see the Poetic Signal Toolkit.
+            {exportDone && (
+              <div className="export-complete" role="status" aria-live="polite">
+                <p>Video exported. Check your downloads.</p>
+                {DEMO_MODE && (
+                  <>
+                    <p>
+                      Preview export is limited to {DEMO_MAX_SECONDS} seconds. The full version
+                      exports the whole track.
+                    </p>
+                    <a className="buy-btn" href={BUY_URL} target="_blank" rel="noopener noreferrer">
+                      GET THE FULL VERSION
+                    </a>
+                    <p className="buy-note">One-time purchase. No subscription.</p>
+                  </>
+                )}
               </div>
             )}
-
-            <button
-              className="play-btn"
-              onClick={togglePlay}
-              disabled={isRecording}
-              aria-label={isPlaying ? 'Pause' : 'Play'}
-              title={isPlaying ? 'Pause' : 'Play'}
-            >
-              {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-            </button>
           </div>
         )}
 

@@ -7,7 +7,8 @@ export class VideoRecorder {
     canvas: HTMLCanvasElement,
     audioStream?: MediaStream | null,
     maxDurationMs?: number,
-    onAutoStop?: () => void
+    onAutoStop?: () => void,
+    onComplete?: () => void
   ) {
     this.recordedChunks = [];
     this.clearAutoStopTimer();
@@ -44,8 +45,11 @@ export class VideoRecorder {
       }
     };
 
+    // Runs for every finish that saves a file: the length cap, the track
+    // ending, or a manual stopRecording(). cancelRecording() clears it.
     this.mediaRecorder.onstop = () => {
       this.downloadVideo();
+      onComplete?.();
     };
 
     this.mediaRecorder.start();
