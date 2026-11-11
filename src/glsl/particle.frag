@@ -35,7 +35,8 @@ void main() {
   // Audio increases brightness and intensity
   vec3 finalColor = desaturatedColor * (1.0 + vAudioValue * 1.5 * uFlicker) * uBrightness;
 
-  // 疑似的な球のシェーディング：点を半球として扱い、片側を明るく片側を暗くする
+  // Fake sphere shading: treat the point as a hemisphere, light one side and
+  // darken the other.
   vec2 p = (gl_PointCoord - 0.5) * 2.0;
   float sphereZ = sqrt(max(1.0 - dot(p, p), 0.0));
   vec3 sphereNormal = normalize(vec3(p.x, p.y, sphereZ));
@@ -44,7 +45,7 @@ void main() {
   float shading = mix(0.45, 1.15, diffuse);
   finalColor *= shading;
 
-  // 奥行きフォグ：カメラから遠い粒ほど暗くする
+  // Depth fog: the further a particle is from the camera, the darker it gets.
   float fogFactor = exp(-uFogDensity * uFogDensity * vCameraDist * vCameraDist);
   finalColor *= fogFactor;
   

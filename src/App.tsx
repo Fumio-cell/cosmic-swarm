@@ -78,9 +78,9 @@ function App() {
   }
 
   return (
-    <div className="toolkit-wrapper" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <div className="toolkit-wrapper">
       <Header />
-      <main className="app-container" style={{ flex: 1, position: 'relative' }}>
+      <main className="app-container">
         <Scene 
         reactiveness={reactiveness} zoom={zoom} hueShift={hueShift} 
         rotationSpeed={rotationSpeed} chaos={chaos} shape={shape} 

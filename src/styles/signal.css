@@ -1,0 +1,61 @@
+/* SIGNAL design system.
+   The only file in src/ that may contain a colour literal (the particle engine
+   and the scene clear colour are picture, not interface, and keep their own).
+   Self-hosted fonts, latin subset only, no network request at runtime. */
+
+/* IBM Plex Mono: labels, controls, values and notes. */
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
+/* Archivo: display. The package ships one variable file per subset and has no
+   latin-only stylesheet, so the latin face is declared here by hand. */
+@font-face {
+  font-family: 'Archivo Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+:root {
+  /* Ground */
+  --ink: #0a0a0a;
+  --ink-stage: #050505;
+  --ink-panel: #141412;
+
+  /* Rules and borders */
+  --line: #1d1d1a;
+  --line-control: #62625a;
+
+  /* Type */
+  --paper: #f4f4f0;
+  --paper-dim: #9a9a90;
+  --paper-label: #8a8a80;
+
+  /* Accent */
+  --acid: #d8ff3e;
+  --acid-press: #b9e016;
+  --signal-red: #ff2d55;
+  --focus-ring: #d8ff3e;
+
+  /* Space */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 14px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --space-6: 40px;
+
+  /* Shape */
+  --radius-none: 0;
+  --radius-thumb: 2px;
+  --rule-hair: 1px;
+  --rule-signature: 3px;
+
+  /* Families */
+  --font-display: 'Archivo Variable', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}

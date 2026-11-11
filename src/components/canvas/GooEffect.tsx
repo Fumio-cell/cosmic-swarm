@@ -9,7 +9,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   // Thresholding for Goo / Metaball effect
   float mask = smoothstep(0.12, 0.25, luma);
   
-  // Anti-Halation (白飛び防止): Additive blending causes RGB to exceed 1.0 (pure white).
+  // Anti-halation (stops the highlights blowing out): additive blending pushes RGB past 1.0 (pure white).
   // By normalizing the vector, we perfectly preserve the original neon hue (Cyan/Green),
   // and use a logarithmic curve to compress the extreme brightness.
   vec3 color = inputColor.rgb;

@@ -87,7 +87,8 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
     return { positions, colors, sizes, opacities, audioIndices };
   }, [shape]);
 
-  // BufferAttributeを一度だけ作り、複数のpointsで共有する（GPUバッファは1つだけ確保される）
+  // Build the BufferAttributes once and share them across the points layers,
+  // so only one set of GPU buffers is allocated.
   const geometry = useMemo(() => {
     const geom = new THREE.BufferGeometry();
     geom.setAttribute('position', new THREE.BufferAttribute(particles.positions, 3));
@@ -104,7 +105,7 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
     };
   }, [geometry]);
 
-  // レイヤーを増やしたい場合はここに追加するだけでよい
+  // To add another render layer, add it to this list.
   const RENDER_LAYERS = useMemo(() => [
     { kind: 'core', timeOffset: 0.0, trailOpacity: 1.0 },
     { kind: 'glow', timeOffset: 0.0, trailOpacity: 1.0 },

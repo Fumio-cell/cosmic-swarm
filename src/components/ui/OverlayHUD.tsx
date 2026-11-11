@@ -231,7 +231,8 @@ export function OverlayHUD({
       {!fileName && !imageFile && (
         <div className="concept">
           <p className="concept-text">A 3D swarm of light that moves to your music. Render it to video in your browser.</p>
-          <p className="concept-note">No subscription. No upload.</p>
+          <p className="concept-statement">NOTHING LEAVES THIS MACHINE</p>
+          <p className="concept-note">No upload. No account. The file is made here.</p>
         </div>
       )}
 
@@ -248,7 +249,6 @@ export function OverlayHUD({
               fileInputRef.current?.click();
             }
           }}
-          style={{ cursor: 'pointer' }}
         >
           <input
             type="file"
@@ -288,7 +288,7 @@ export function OverlayHUD({
               <Video size={18} />
               <span>
                 {isRecording
-                  ? 'RECORDING...'
+                  ? 'WRITING VIDEO'
                   : DEMO_MODE
                     ? <>RENDER VIDEO <span className="nowrap">({DEMO_MAX_SECONDS}S PREVIEW)</span></>
                     : 'RENDER VIDEO'}
@@ -332,15 +332,14 @@ export function OverlayHUD({
           </div>
 
           {imageFile && (
-            <div className="slider-group" style={{ padding: '0.8rem 0', borderBottom: '1px solid var(--border)', marginBottom: '1rem' }}>
-              <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: 0 }}>
+            <div className="slider-group param-group-bottom">
+              <label className="param-group-head">
                 <span>IMAGE VOXEL MODE</span>
                 <button
-                  className="shape-btn"
+                  className="shape-btn clear-image-btn"
                   title="CLEAR IMAGE (RETURN TO SWARM)"
                   aria-label="Clear image and return to swarm"
                   onClick={() => setImageFile(null)}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px' }}
                 >
                   <X size={14} /> CLEAR
                 </button>
@@ -452,18 +451,17 @@ export function OverlayHUD({
             </div>
           </div>
 
-          <div className="slider-group" style={{ padding: '0.8rem 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '1rem' }}>
+          <div className="slider-group param-group-band">
             <button
               type="button"
               role="switch"
               aria-checked={liquidFusion}
               aria-labelledby="liquid-fusion-label"
               className="switch-row"
-              style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', margin: 0 }}
               onClick={() => setLiquidFusion(!liquidFusion)}
             >
               <span id="liquid-fusion-label">LIQUID FUSION (METABALL)</span>
-              <span style={{ color: liquidFusion ? 'var(--neon-green)' : '#666', fontWeight: 'bold' }}>{liquidFusion ? 'ON' : 'OFF'}</span>
+              <span className={`switch-value ${liquidFusion ? 'on' : ''}`}>{liquidFusion ? 'ON' : 'OFF'}</span>
             </button>
           </div>
 
@@ -570,18 +568,8 @@ export function OverlayHUD({
         </div>
 
       {/* Interaction Hint */}
-      <div className="interaction-hint" style={{
-        position: 'absolute',
-        bottom: '24px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        fontSize: '10px',
-        letterSpacing: '0.2em',
-        color: 'rgba(255, 255, 255, 0.4)',
-        pointerEvents: 'none',
-        userSelect: 'none',
-      }}>
-        CLICK & DRAG TO ROTATE 360°
+      <div className="interaction-hint">
+        CLICK &amp; DRAG TO ROTATE 360°
       </div>
     </div>
   );
