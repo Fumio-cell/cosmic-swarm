@@ -79,9 +79,11 @@ export function OverlayHUD({
   const [sampleLoading, setSampleLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // The accent marks the one thing to do next: load something, then render it,
-  // and once the file is written, the full version. Exactly one filled button.
-  const hasMedia = Boolean(fileName || imageFile);
+  // The accent marks the one thing to do next: load a track, then render it,
+  // and once the file is written, the full version. Exactly one filled button,
+  // and none only while the tool is busy. An image on its own is not a track,
+  // so the sample button keeps the accent until audio arrives.
+  const hasTrack = Boolean(fileName);
 
   useEffect(() => {
     const handleEnded = () => {
@@ -268,7 +270,7 @@ export function OverlayHUD({
           <span className="sub-text">MP3, WAV, AIFF, FLAC / IMAGE</span>
         </div>
 
-        <button type="button" className={`sample-btn ${hasMedia ? 'is-secondary' : 'is-primary'}`} onClick={loadSample} disabled={sampleLoading || isRecording}>
+        <button type="button" className={`sample-btn ${hasTrack ? 'is-secondary' : 'is-primary'}`} onClick={loadSample} disabled={sampleLoading || isRecording}>
           <Music size={16} />
           {sampleLoading ? 'LOADING...' : 'TRY A SAMPLE'}
         </button>
