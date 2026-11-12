@@ -181,18 +181,6 @@ body {
   letter-spacing: -0.02em;
   text-transform: uppercase;
   color: var(--paper);
-  margin-bottom: var(--space-2);
-}
-
-/* mono/control */
-.info-modal h3 {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  line-height: 16px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--paper-dim);
   margin-bottom: var(--space-5);
 }
 
@@ -367,7 +355,9 @@ body {
 
 /* -------------------------------------------------------------- buttons -- */
 
-/* display/button, the one acid action on the first screen */
+/* display/button. The accent marks the one thing to do next, so the fill moves
+   from button to button as the state changes: .is-primary is the filled acid
+   one, .is-secondary the outlined one, and only ever one of them is filled. */
 .sample-btn {
   display: flex;
   align-items: center;
@@ -375,23 +365,15 @@ body {
   gap: var(--space-2);
   width: 100%;
   padding: var(--space-2) var(--space-3);
-  background: var(--acid);
-  border: var(--rule-hair) solid var(--acid);
+  border: var(--rule-hair) solid var(--line-control);
   border-radius: var(--radius-none);
-  color: var(--ink);
   font-family: var(--font-display);
   font-size: 15px;
   line-height: 20px;
   font-weight: 700;
   cursor: pointer;
   pointer-events: auto;
-  transition: background-color 120ms ease, border-color 120ms ease;
-}
-
-.sample-btn:hover:not(:disabled),
-.sample-btn:active:not(:disabled) {
-  background: var(--acid-press);
-  border-color: var(--acid-press);
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .sample-btn:disabled {
@@ -463,7 +445,8 @@ body {
   cursor: not-allowed;
 }
 
-/* display/button */
+/* display/button; .is-primary once a track is loaded, .is-secondary once the
+   export is done and the next thing to do is elsewhere. */
 .render-btn {
   display: flex;
   align-items: center;
@@ -473,21 +456,14 @@ body {
   min-width: 0;
   padding: var(--space-2) var(--space-3);
   text-align: center;
-  background: transparent;
   border: var(--rule-hair) solid var(--line-control);
   border-radius: var(--radius-none);
-  color: var(--paper);
   font-family: var(--font-display);
   font-size: 15px;
   line-height: 20px;
   font-weight: 700;
   cursor: pointer;
   transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
-}
-
-.render-btn:hover:not(:disabled) {
-  border-color: var(--acid);
-  color: var(--acid);
 }
 
 /* Recording: a solid fill and a different word, so the state reads without
@@ -553,26 +529,46 @@ body {
   overflow-wrap: anywhere;
 }
 
-/* display/button */
+/* display/button; the primary once the file has been written. */
 .buy-btn {
   display: block;
   text-align: center;
   padding: var(--space-2) var(--space-3);
-  background: var(--acid);
-  border: var(--rule-hair) solid var(--acid);
+  border: var(--rule-hair) solid var(--line-control);
   border-radius: var(--radius-none);
-  color: var(--ink);
   font-family: var(--font-display);
   font-size: 15px;
   line-height: 20px;
   font-weight: 700;
   text-decoration: none;
-  transition: background-color 120ms ease, border-color 120ms ease;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
-.buy-btn:hover {
+/* The accent itself. These come after every button rule so the modifier wins,
+   and .render-btn.recording still beats them both. */
+.is-primary {
+  background: var(--acid);
+  border-color: var(--acid);
+  color: var(--ink);
+}
+
+.is-primary:hover:not(:disabled),
+.is-primary:active:not(:disabled) {
   background: var(--acid-press);
   border-color: var(--acid-press);
+}
+
+/* Opaque, even when it is not the primary: the sample button sits on the stage
+   with no panel behind it, so its own ground is the only one it has. */
+.is-secondary {
+  background: var(--ink-panel);
+  border-color: var(--line-control);
+  color: var(--paper);
+}
+
+.is-secondary:hover:not(:disabled) {
+  border-color: var(--acid);
+  color: var(--acid);
 }
 
 /* mono/label */
@@ -846,20 +842,22 @@ body {
   justify-content: center;
   padding: var(--space-2);
   background: transparent;
-  border: none;
+  /* a transparent hairline so marking the selected one shifts nothing */
+  border: var(--rule-hair) solid transparent;
   border-radius: var(--radius-none);
   color: var(--paper-dim);
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: border-color 120ms ease, color 120ms ease;
 }
 
 .shape-btn:hover {
   color: var(--acid);
 }
 
+/* An active state, not a primary: acid as outline and icon colour, never a fill. */
 .shape-btn.active {
-  background: var(--acid);
-  color: var(--ink);
+  border-color: var(--acid);
+  color: var(--acid);
 }
 
 /* The clear-image button reuses the formation button, with room for its word. */

@@ -54,11 +54,10 @@ export const Header: React.FC = () => {
                     <div className="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" onClick={e => e.stopPropagation()}>
                         <button ref={closeButtonRef} className="info-close" aria-label="Close" onClick={() => setShowInfo(false)}><X size={20}/></button>
                         <h2 id="info-modal-title">Cosmic Swarm</h2>
-                        <h3>Macroscopic &amp; Microscopic Audio-Reactive Entity Engine</h3>
 
                         <div className="info-modal-body">
-                            <p>Cosmic Swarm is a highly reactive WebGL visualization engine that simulates living organic matter, scaling from cellular division to stellar nebulae. Driven by audio frequency separation, bass kicks induce massive liquid expansion and droplet detachment, while high-frequency treble triggers micro-ripples across the entity's surface. Enhanced with structural color iridescence and metaball physics, it generates poetic, mesmerizing visual signals synchronized perfectly with sound.</p>
-                            <ul><li>Key Features: Audio Frequency Separation, Metaball Liquid Fusion, Iridescent Structural Color, Real-time Droplet Physics.</li></ul>
+                            <p>Cosmic Swarm reads a track you load and moves a swarm of particles to it: the bass expands the swarm, the treble ripples across its surface.</p>
+                            <p>Pick a look, set the controls, then render what you see to a video file. The track is decoded in your browser and the video is written there as well, so nothing is uploaded and no account is needed.</p>
                         </div>
 
                         <p>Sample track: "Keeper" by Bomb Sun.</p>

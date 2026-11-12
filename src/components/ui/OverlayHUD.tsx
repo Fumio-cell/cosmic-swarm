@@ -79,6 +79,10 @@ export function OverlayHUD({
   const [sampleLoading, setSampleLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // The accent marks the one thing to do next: load something, then render it,
+  // and once the file is written, the full version. Exactly one filled button.
+  const hasMedia = Boolean(fileName || imageFile);
+
   useEffect(() => {
     const handleEnded = () => {
       setIsPlaying(false);
@@ -264,7 +268,7 @@ export function OverlayHUD({
           <span className="sub-text">MP3, WAV, AIFF, FLAC / IMAGE</span>
         </div>
 
-        <button type="button" className="sample-btn" onClick={loadSample} disabled={sampleLoading || isRecording}>
+        <button type="button" className={`sample-btn ${hasMedia ? 'is-secondary' : 'is-primary'}`} onClick={loadSample} disabled={sampleLoading || isRecording}>
           <Music size={16} />
           {sampleLoading ? 'LOADING...' : 'TRY A SAMPLE'}
         </button>
@@ -284,7 +288,7 @@ export function OverlayHUD({
               </button>
             </div>
 
-            <button className={`render-btn ${isRecording ? 'recording' : ''}`} onClick={startRender} disabled={isRecording}>
+            <button className={`render-btn ${isRecording ? 'recording' : exportDone ? 'is-secondary' : 'is-primary'}`} onClick={startRender} disabled={isRecording}>
               <Video size={18} />
               <span>
                 {isRecording
@@ -311,7 +315,7 @@ export function OverlayHUD({
                       Preview export is limited to {DEMO_MAX_SECONDS} seconds. The full version
                       exports the whole track.
                     </p>
-                    <a className="buy-btn" href={BUY_URL} target="_blank" rel="noopener noreferrer">
+                    <a className="buy-btn is-primary" href={BUY_URL} target="_blank" rel="noopener noreferrer">
                       GET THE FULL VERSION
                     </a>
                     <p className="buy-note">One-time purchase. No subscription.</p>
