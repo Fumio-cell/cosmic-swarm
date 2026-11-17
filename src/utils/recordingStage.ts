@@ -5,6 +5,13 @@ export const FRAME_WIDTH = 1920;
 export const FRAME_HEIGHT = 1080;
 
 /**
+ * The frame height, in pixels, at which the default swarm's points keep the pixel size they have always been given.
+ * Main drew them at 1 px per shader unit on a 1440x829 canvas (a 1440x900 window under the 71 px header), the look
+ * that was approved, so a point is 1/829 of the frame's height at any window and in the file.
+ */
+export const POINT_REFERENCE_HEIGHT = 829;
+
+/**
  * True from just before a recording starts until it has ended or been cancelled. While it is true the Scene draws
  * the stage with exactly FRAME_WIDTH x FRAME_HEIGHT pixels (by raising or lowering the pixel ratio of the frame
  * that is on screen), so canvas.captureStream() delivers that size. The Scene reads it with useRecordingFrame().

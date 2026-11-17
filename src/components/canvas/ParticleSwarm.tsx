@@ -5,7 +5,7 @@ import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import type { ShapeType } from '../../App';
 import vertShader from '../../glsl/particle.vert?raw';
 import fragShader from '../../glsl/particle.frag?raw';
-import { FRAME_HEIGHT } from '../../utils/recordingStage';
+import { POINT_REFERENCE_HEIGHT } from '../../utils/recordingStage';
 
 const PARTICLE_COUNT = 30000;
 
@@ -140,8 +140,8 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
 
   useFrame((state) => {
     const elapsed = state.clock.elapsedTime;
-    // Point sizes were drawn for a 1080-pixel-high frame; scale them to the frame that is actually drawn.
-    const frameScale = (state.size.height * state.viewport.dpr) / FRAME_HEIGHT;
+    // Point sizes are relative to the frame: 1 at POINT_REFERENCE_HEIGHT pixels high, scaled to the frame that is drawn.
+    const frameScale = (state.size.height * state.viewport.dpr) / POINT_REFERENCE_HEIGHT;
 
     RENDER_LAYERS.forEach((layer, i) => {
       const mat = shaderRefs.current[i];

@@ -8,7 +8,7 @@ uniform float uParticleSize;
 uniform float uLiquidFusion;
 uniform float uBass;
 uniform float uTreble;
-uniform float uFrameScale; // height of the frame in pixels / 1080, so size relative to the frame never depends on the window
+uniform float uFrameScale; // height of the frame in pixels / POINT_REFERENCE_HEIGHT, so size relative to the frame never depends on the window
 
 attribute float aSize;
 attribute vec3 aColor;
@@ -84,6 +84,7 @@ void main() {
   // Clamp minimum size to 1.5 to prevent extreme sub-pixel aliasing (twinkling) when moving
   float distToCamera = length(mvPosition.xyz);
   float fusionScale = mix(1.0, 2.5, uLiquidFusion); // Moderated scale so it doesn't become one giant blob
-  gl_PointSize = clamp(pSize * fusionScale, 1.5, 800.0);
+  // The 1.5 px floor keeps tiny points from twinkling on a small preview; on a frame bigger than the reference it grows with the frame.
+  gl_PointSize = clamp(pSize * fusionScale, 1.5 * max(uFrameScale, 1.0), 800.0);
   gl_Position = projectionMatrix * mvPosition;
 }

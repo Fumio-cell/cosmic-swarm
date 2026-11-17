@@ -1,4 +1,23 @@
 import { releaseRecordingFrame } from './recordingStage';
+import { addAudioLeadInEdit } from './mp4Edit';
+
+/**
+ * What to record. H.264 in MP4 first: the browser encodes it in hardware and holds 60 fps at 1080p, where the
+ * software VP9 encoder delivered about 27 fps. WebM (VP9, then VP8) only when no MP4 type is supported.
+ * The H.264 encoder delivers about twice the bitrate it is asked for on this content: 10 Mbps asked is about
+ * 20 Mbps written, 25 MB for 10 s of 1080p60.
+ */
+const FORMATS = [
+  { mimeType: 'video/mp4;codecs=avc1,mp4a.40.2', videoBitsPerSecond: 10_000_000 },
+  { mimeType: 'video/mp4;codecs=avc1,opus', videoBitsPerSecond: 10_000_000 },
+  { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 250_000_000 },
+  { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 250_000_000 },
+  { mimeType: 'video/webm;codecs=vp8,opus', videoBitsPerSecond: 250_000_000 },
+];
+
+function pickRecordingFormat() {
+  return FORMATS.find((f) => MediaRecorder.isTypeSupported(f.mimeType)) ?? { mimeType: 'video/webm', videoBitsPerSecond: 250_000_000 };
+}
 
 export class VideoRecorder {
   private mediaRecorder: MediaRecorder | null = null;
@@ -23,22 +42,12 @@ export class VideoRecorder {
       audioStream.getAudioTracks().forEach((track) => videoStream.addTrack(track));
     }
 
-    // Try VP9 with Opus audio first (best quality WebM), fall back gracefully
-    let mimeType = 'video/webm;codecs=vp9,opus';
-    if (!MediaRecorder.isTypeSupported(mimeType)) {
-      mimeType = 'video/webm;codecs=vp9';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm;codecs=vp8,opus';
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm';
-        }
-      }
-    }
+    const { mimeType, videoBitsPerSecond } = pickRecordingFormat();
 
     try {
       this.mediaRecorder = new MediaRecorder(videoStream, {
         mimeType,
-        videoBitsPerSecond: 250000000, // 250 Mbps video
+        videoBitsPerSecond,
         audioBitsPerSecond: 320000,    // 320 kbps audio (high quality)
       });
     } catch (e) {
@@ -57,8 +66,7 @@ export class VideoRecorder {
     // The stage goes back to the window's size first.
     this.mediaRecorder.onstop = () => {
       releaseRecordingFrame();
-      this.downloadVideo();
-      onComplete?.();
+      void this.downloadVideo().finally(() => onComplete?.());
     };
 
     this.mediaRecorder.start();
@@ -99,18 +107,30 @@ export class VideoRecorder {
     releaseRecordingFrame();
   }
 
-  private downloadVideo() {
-    const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+  private async downloadVideo(): Promise<void> {
+    // The container the browser actually wrote decides the type and the extension.
+    const isMp4 = (this.mediaRecorder?.mimeType ?? '').startsWith('video/mp4');
+    let blob = new Blob(this.recordedChunks, { type: isMp4 ? 'video/mp4' : 'video/webm' });
+    if (isMp4) {
+      // The AAC lead-in would otherwise put the sound about 48 ms behind the picture. If the edit cannot be made, the
+      // recording is saved as it is.
+      try {
+        const edited = addAudioLeadInEdit(await blob.arrayBuffer());
+        if (edited) blob = new Blob([edited], { type: 'video/mp4' });
+      } catch {
+        /* keep the recording as the browser wrote it */
+      }
+    }
     const url = URL.createObjectURL(blob);
-    
+
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = url;
-    a.download = `cosmic_swarm_render_${Date.now()}.webm`;
-    
+    a.download = `cosmic_swarm_render_${Date.now()}.${isMp4 ? 'mp4' : 'webm'}`;
+
     document.body.appendChild(a);
     a.click();
-    
+
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
