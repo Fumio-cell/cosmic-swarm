@@ -5,6 +5,7 @@ import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import type { ShapeType } from '../../App';
 import vertShader from '../../glsl/particle.vert?raw';
 import fragShader from '../../glsl/particle.frag?raw';
+import { FRAME_HEIGHT } from '../../utils/recordingStage';
 
 const PARTICLE_COUNT = 30000;
 
@@ -128,6 +129,7 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
         uLiquidFusion: { value: liquidFusion ? 1.0 : 0.0 },
         uBass: { value: 0.0 },
         uTreble: { value: 0.0 },
+        uFrameScale: { value: 1.0 },
         uTrailOpacity: { value: 1.0 },
         uFogDensity: { value: 0.02 },
         uCoreMode: { value: RENDER_LAYERS[i]?.kind === 'core' ? 1.0 : 0.0 },
@@ -138,6 +140,8 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
 
   useFrame((state) => {
     const elapsed = state.clock.elapsedTime;
+    // Point sizes were drawn for a 1080-pixel-high frame; scale them to the frame that is actually drawn.
+    const frameScale = (state.size.height * state.viewport.dpr) / FRAME_HEIGHT;
 
     RENDER_LAYERS.forEach((layer, i) => {
       const mat = shaderRefs.current[i];
@@ -159,6 +163,7 @@ export function ParticleSwarm({ reactiveness = 1.0, hueShift = 0.0, chaos = 0.0,
       u.uBass.value = audioAnalyzer.bass;
       u.uTreble.value = audioAnalyzer.treble;
       u.uTrailOpacity.value = layer.trailOpacity;
+      u.uFrameScale.value = frameScale;
     });
 
     if (audioAnalyzer.isPlaying()) {

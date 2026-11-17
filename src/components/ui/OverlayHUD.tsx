@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { audioAnalyzer } from '../../audio/AudioAnalyzer';
 import { videoRecorder } from '../../utils/VideoRecorder';
+import { acquireRecordingFrame, releaseRecordingFrame } from '../../utils/recordingStage';
 import { DEMO_MODE, DEMO_MAX_SECONDS, BUY_URL } from '../../config';
 import { Play, Pause, Upload, Settings, Video, Aperture, Circle, LifeBuoy, Droplets, X, Ban, XCircle, Music, Shuffle } from 'lucide-react';
 import type { ShapeType } from '../../App';
@@ -78,6 +79,7 @@ export function OverlayHUD({
   const [fileName, setFileName] = useState<string | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const starting = useRef(false);
 
   // The accent marks the one thing to do next: load a track, then render it,
   // and once the file is written, the full version. Exactly one filled button,
@@ -200,10 +202,22 @@ export function OverlayHUD({
   const startRender = async () => {
     const canvas = document.querySelector('canvas');
 
-    if (!canvas) return;
+    if (!canvas || starting.current) return;
+    starting.current = true;
 
-    audioAnalyzer.audio.currentTime = 0;
-    await audioAnalyzer.audio.play();
+    try {
+      // The stage is brought to the recording size before the track starts, so the file
+      // holds the track from its first sample.
+      await acquireRecordingFrame(canvas);
+      audioAnalyzer.audio.currentTime = 0;
+      await audioAnalyzer.audio.play();
+    } catch (e) {
+      releaseRecordingFrame();
+      starting.current = false;
+      alert(`Could not start the render (${e instanceof Error ? e.message : String(e)})`);
+      return;
+    }
+    starting.current = false;
     setIsPlaying(true);
     setIsRecording(true);
     setExportDone(false);

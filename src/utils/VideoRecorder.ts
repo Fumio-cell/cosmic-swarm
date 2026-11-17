@@ -1,3 +1,5 @@
+import { releaseRecordingFrame } from './recordingStage';
+
 export class VideoRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
@@ -33,11 +35,16 @@ export class VideoRecorder {
       }
     }
 
-    this.mediaRecorder = new MediaRecorder(videoStream, {
-      mimeType,
-      videoBitsPerSecond: 250000000, // 250 Mbps video
-      audioBitsPerSecond: 320000,    // 320 kbps audio (high quality)
-    });
+    try {
+      this.mediaRecorder = new MediaRecorder(videoStream, {
+        mimeType,
+        videoBitsPerSecond: 250000000, // 250 Mbps video
+        audioBitsPerSecond: 320000,    // 320 kbps audio (high quality)
+      });
+    } catch (e) {
+      releaseRecordingFrame();
+      throw e;
+    }
 
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
@@ -47,7 +54,9 @@ export class VideoRecorder {
 
     // Runs for every finish that saves a file: the length cap, the track
     // ending, or a manual stopRecording(). cancelRecording() clears it.
+    // The stage goes back to the window's size first.
     this.mediaRecorder.onstop = () => {
+      releaseRecordingFrame();
       this.downloadVideo();
       onComplete?.();
     };
@@ -87,6 +96,7 @@ export class VideoRecorder {
       this.mediaRecorder.stop();
     }
     this.recordedChunks = [];
+    releaseRecordingFrame();
   }
 
   private downloadVideo() {

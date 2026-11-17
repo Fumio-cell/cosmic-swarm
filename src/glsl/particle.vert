@@ -8,6 +8,7 @@ uniform float uParticleSize;
 uniform float uLiquidFusion;
 uniform float uBass;
 uniform float uTreble;
+uniform float uFrameScale; // height of the frame in pixels / 1080, so size relative to the frame never depends on the window
 
 attribute float aSize;
 attribute vec3 aColor;
@@ -78,7 +79,7 @@ void main() {
   vCameraDist = -mvPosition.z;
 
   // Exaggerate size perspective for stronger 3D feel
-  float pSize = aSize * (50.0 / max(-mvPosition.z, 0.1)) * (1.0 + audioValue * 2.0 * uFlicker) * uParticleSize;
+  float pSize = aSize * (50.0 / max(-mvPosition.z, 0.1)) * (1.0 + audioValue * 2.0 * uFlicker) * uParticleSize * uFrameScale;
   
   // Clamp minimum size to 1.5 to prevent extreme sub-pixel aliasing (twinkling) when moving
   float distToCamera = length(mvPosition.xyz);

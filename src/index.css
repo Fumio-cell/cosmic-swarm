@@ -42,8 +42,15 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: var(--ink-stage);
+  background-color: var(--ink);
   z-index: 1;
+}
+
+/* The frame the file will have: 16:9, centred, sized in Scene.tsx. The hairline outside it marks its edge. */
+.stage-frame {
+  position: absolute;
+  background-color: var(--ink-stage);
+  outline: var(--rule-hair) solid var(--line);
 }
 
 /* -------------------------------------------------------------- top bar -- */
